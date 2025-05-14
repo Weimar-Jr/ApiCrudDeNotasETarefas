@@ -25,6 +25,8 @@ public class Nota {
     private String tituloNota;
     @Column(nullable = false, name = "texto_da_nota")
     private String nota;
+    @Column(nullable = false, name = "tags_da_nota")
+    private List<String> tag;
 
     @OneToMany(mappedBy = "nota", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarefa> tarefasRelacionadas = new ArrayList<>();

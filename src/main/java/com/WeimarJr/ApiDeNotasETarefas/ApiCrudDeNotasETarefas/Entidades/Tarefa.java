@@ -23,7 +23,7 @@ public class Tarefa {
     @Column(nullable = true, name = "descricao_da_tarefa")
     private String descricaoTarefa;
     @Column(nullable = false, name = "prioriadade_da_tarefa")
-    private String prioridadeTarefa;
+    private int prioridadeTarefa;
     @Column(nullable = false, name = "se_a_tarefa_foi_concluida")
     private  Boolean concluida = false;
 
