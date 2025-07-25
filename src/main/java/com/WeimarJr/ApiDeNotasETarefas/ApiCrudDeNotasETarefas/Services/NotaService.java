@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Service
 public class NotaService {
-    NotaRepository notaRepository;
+    private final NotaRepository notaRepository;
     public NotaService( NotaRepository notaRepository)
     {
         this.notaRepository = notaRepository;
@@ -44,8 +44,8 @@ public class NotaService {
         return notaRepository.findById(id);
     }
 
-    public List<Nota> exibirNotasPelaTag(String tag)
+    public List<Nota> exibirNotasPelaTag(List<String> tag)
     {
-        return notaRepository.findByTag(tag);
+        return notaRepository.findAllByTag(tag);
     }
 }

@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
-    List<Tarefa> findByPrioridade(int prioridade);
-    List<Tarefa> findByConcluido(Boolean concluido);
+    List<Tarefa> findAllByPrioridade(int prioridade);
+    List<Tarefa> findAllByConcluida(Boolean concluida);
 }
