@@ -25,10 +25,19 @@ public class Nota {
     private String tituloNota;
     @Column(nullable = false, name = "texto_da_nota")
     private String nota;
-    @Column(nullable = false, name = "tags_da_nota")
-    private List<String> tag;
+    @Column(nullable = false, name = "tag_da_nota")
+    private String tag;
 
     @OneToMany(mappedBy = "nota", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarefa> tarefasRelacionadas = new ArrayList<>();
 
+    public void setTarefa(Tarefa tarefa)
+    {
+        this.tarefasRelacionadas.add(tarefa);
+    }
+
+    public void deletarTarefa(Tarefa tarefa)
+    {
+        this.tarefasRelacionadas.remove(tarefa);
+    }
 }

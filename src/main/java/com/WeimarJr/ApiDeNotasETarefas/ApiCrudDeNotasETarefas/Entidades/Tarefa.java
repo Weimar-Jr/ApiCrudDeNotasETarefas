@@ -31,4 +31,5 @@ public class Tarefa {
     @JoinColumn(name = "nota_id")
     private Nota nota;
 
+
 }

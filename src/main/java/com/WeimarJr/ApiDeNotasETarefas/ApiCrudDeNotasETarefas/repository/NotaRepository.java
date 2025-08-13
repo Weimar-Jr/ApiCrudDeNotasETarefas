@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface NotaRepository extends JpaRepository<Nota, Long> {
 
-    List<Nota> findAllByTag(List<String> tag);
+    List<Nota> findAllByTag(String tag);
 }

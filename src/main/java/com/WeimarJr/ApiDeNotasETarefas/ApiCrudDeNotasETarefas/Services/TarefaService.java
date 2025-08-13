@@ -2,7 +2,9 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ import java.util.Optional;
 public class TarefaService {
 
     private final TarefaRepository tarefaRepository;
+    private final NotaRepository notaRepository;
 
-    public TarefaService(TarefaRepository  tarefaRepository)
+    public TarefaService(TarefaRepository  tarefaRepository, NotaRepository notaRepository)
     {
         this.tarefaRepository = tarefaRepository;
+        this.notaRepository = notaRepository;
     }
 
 
@@ -85,4 +89,22 @@ public class TarefaService {
         }
     }
 
+    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws ExceptionsTarefa {
+        Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
+        if(tarefa.isPresent())
+        {
+            Optional<Nota> nota = notaRepository.findById(idNota);
+            if(nota.isPresent())
+            {
+                nota.get().setTarefa(tarefa.get());
+                tarefa.get().setNota(nota.get());
+                System.out.println("Tarefa atribuida a nota");
+                return listarTarefas();
+            }else{
+                throw new ExceptionsTarefa("não foi achada a nota pelo id");
+            }
+        }else{
+            throw new ExceptionsTarefa("não foi achada a tarefa pelo id");
+        }
+    }
 }
