@@ -1,7 +1,6 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers.ExceptionsNota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.TarefaService;
 import org.springframework.web.bind.annotation.*;

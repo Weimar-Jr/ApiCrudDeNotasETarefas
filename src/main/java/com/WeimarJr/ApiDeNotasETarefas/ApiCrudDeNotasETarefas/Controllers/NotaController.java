@@ -3,9 +3,8 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.NotaService;
 import org.springframework.web.bind.annotation.*;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers.ExceptionsNota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers.ExceptionsTarefa;
-import java.util.Collections;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
 import java.util.List;
 import java.util.Optional;
 
