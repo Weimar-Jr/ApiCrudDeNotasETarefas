@@ -10,25 +10,26 @@ import lombok.Setter;
 @Table(name = "lista_de_tarefas")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class Tarefa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     private Long id;
 
     @Column(nullable = false, name = "nome_da_tarefa")
-    private String nomeTarefa;
+    @Getter @Setter private String nomeTarefa;
     @Column(nullable = true, name = "descricao_da_tarefa")
-    private String descricaoTarefa;
+    @Getter @Setter private String descricaoTarefa;
     @Column(nullable = false, name = "prioridade_da_tarefa")
-    private int prioridade;
+    @Getter @Setter private int prioridade;
     @Column(nullable = false, name = "se_a_tarefa_foi_concluida")
-    private  Boolean concluida = false;
+    @Getter @Setter private  Boolean concluida = false;
 
     @ManyToOne
     @JoinColumn(name = "nota_id")
+    @Getter
+    @Setter
     private Nota nota;
 
 

@@ -37,6 +37,8 @@ public class NotaService {
         Optional<Nota> seNotaExiste= mostrarNotaEspecificaPeloId(nota.getId());
         if(seNotaExiste.isPresent()){
         notaRepository.save(nota);
+        }else{
+            throw new ExceptionsNota("não existe esta nota no sistema.");
         }
         return listarNotas();
     }
@@ -77,6 +79,7 @@ public class NotaService {
             if(tarefa.isPresent())
             {
                 nota.get().deletarTarefa(tarefa.get());
+                editarNota(nota.get());
                 return listarNotas();
             }else{
                 throw new ExceptionsTarefa("não existe tarefa com esse id");
