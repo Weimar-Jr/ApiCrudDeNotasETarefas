@@ -1,6 +1,8 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesaTribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.NotaService;
 import org.springframework.web.bind.annotation.*;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
@@ -12,8 +14,10 @@ import java.util.Optional;
 @RequestMapping("/Nota")
 public class NotaController {
     private final NotaService notaService;
-    public NotaController(NotaService notaService){
+    private final AtribuicaoEDesaTribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
+    public NotaController(NotaService notaService, AtribuicaoEDesaTribuicaoTarefaNotaService desAtribuicao){
         this.notaService = notaService;
+        this.atribuicaoEDesaTribuicaoTarefaNotaService = desAtribuicao;
     }
 
     @GetMapping
@@ -52,7 +56,7 @@ public class NotaController {
     }
 
     @DeleteMapping("/deletar-tarefa-da-nota/{idNota}/{idTarefa}")
-    public  List<Nota> deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws ExceptionsNota, ExceptionsTarefa {
-         return notaService.deletarTarefaDeNota(idNota, idTarefa);
+    public  List<Tarefa> deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws ExceptionsNota, ExceptionsTarefa {
+         return atribuicaoEDesaTribuicaoTarefaNotaService.deletarTarefaDeNota(idNota, idTarefa);
     }
 }

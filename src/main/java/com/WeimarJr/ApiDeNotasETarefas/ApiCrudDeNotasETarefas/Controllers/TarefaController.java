@@ -2,6 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesaTribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.TarefaService;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +12,12 @@ import java.util.List;
 @RequestMapping("/tarefa")
 public class TarefaController {
 
-    final TarefaService tarefaService;
-    public TarefaController( TarefaService tarefaService)
+    private final TarefaService tarefaService;
+    private final AtribuicaoEDesaTribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
+    public TarefaController( TarefaService tarefaService, AtribuicaoEDesaTribuicaoTarefaNotaService atribuicao)
     {
         this.tarefaService = tarefaService;
+        this.atribuicaoEDesaTribuicaoTarefaNotaService = atribuicao;
     }
 
     @GetMapping
@@ -51,7 +54,7 @@ public class TarefaController {
     }
     @PutMapping("/atribuir-tarefa-a-nota/{idTarefa}/{idNota}")
     List<Tarefa> atribuirTarefaANota(@PathVariable("idTarefa") Long idTarefa, @PathVariable("IdNota") Long idNota) throws ExceptionsTarefa {
-        tarefaService.atribuirTarefaANota(idTarefa, idNota);
+        atribuicaoEDesaTribuicaoTarefaNotaService.atribuirTarefaANota(idTarefa, idNota);
         return listarTarefas();
     }
 }
