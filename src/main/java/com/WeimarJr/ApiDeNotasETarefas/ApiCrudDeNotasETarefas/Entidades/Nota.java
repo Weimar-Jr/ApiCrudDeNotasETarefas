@@ -16,7 +16,7 @@ public class Nota {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter  private Long id;
+    @Getter @Setter  private Long id;
 
     @Column(nullable = false, name = "titulo_da_nota")
     @Getter @Setter private String tituloNota;

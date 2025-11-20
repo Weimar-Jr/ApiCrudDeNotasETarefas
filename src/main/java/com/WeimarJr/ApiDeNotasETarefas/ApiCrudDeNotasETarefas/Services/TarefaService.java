@@ -16,12 +16,11 @@ import java.util.Optional;
 public class TarefaService {
 
     private final TarefaRepository tarefaRepository;
-    private final NotaRepository notaRepository;
+
 
     public TarefaService(TarefaRepository  tarefaRepository, NotaRepository notaRepository)
     {
         this.tarefaRepository = tarefaRepository;
-        this.notaRepository = notaRepository;
     }
 
 
@@ -89,22 +88,4 @@ public class TarefaService {
         }
     }
 
-    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws ExceptionsTarefa {
-        Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
-        if(tarefa.isPresent())
-        {
-            Optional<Nota> nota = notaRepository.findById(idNota);
-            if(nota.isPresent())
-            {
-                nota.get().setTarefa(tarefa.get());
-                tarefa.get().setNota(nota.get());
-                System.out.println("Tarefa atribuida a nota");
-                return listarTarefas();
-            }else{
-                throw new ExceptionsTarefa("não foi achada a nota pelo id");
-            }
-        }else{
-            throw new ExceptionsTarefa("não foi achada a tarefa pelo id");
-        }
-    }
 }

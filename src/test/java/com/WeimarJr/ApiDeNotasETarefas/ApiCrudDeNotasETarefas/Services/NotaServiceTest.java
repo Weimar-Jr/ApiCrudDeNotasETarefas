@@ -44,11 +44,13 @@ class NotaServiceTest {
     void objetosParaTeste()
     {
         nota1 = new Nota();
+        nota1.setId(12l);
         nota1.setTituloNota("primeria nota para teste");
         nota1.setNota("essa é a primeira vez que eu faço um teste unitario");
         nota1.setTag("teste");
 
         nota2 = new Nota();
+        nota2.setId(22l);
         nota2.setTituloNota("segunda nota para teste");
         nota2.setNota("espero aprender bem");
         nota2.setTag("teste");
@@ -121,6 +123,7 @@ class NotaServiceTest {
     void deveDarErroEmEditarNota()
     {
         Nota notaNova = new Nota();
+        notaNova.setId(123l);
         when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
 
         ExceptionsNota excecao = assertThrows(ExceptionsNota.class, () -> {
@@ -155,9 +158,11 @@ class NotaServiceTest {
 
     }
 
+    @Test
     void deveDarExcecaoEmDeletarNota()
     {
         Nota notaNova = new Nota();
+        notaNova.setId(123l);
 
         when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
 
@@ -169,6 +174,7 @@ class NotaServiceTest {
 
     }
 
+    @Test
     void deveAcharNotasPelaTag()
     {
         String tagTeste = "teste";
@@ -186,35 +192,39 @@ class NotaServiceTest {
         List<Nota> listaResultado = notaService.exibirNotasPelaTag(tagTeste);
         assertEquals(listaEsperada, listaResultado);
 
-        verify(notaRepository, times(3)).save(nota1);
-        verify(notaRepository, times(1)).findAllByTag(tagTeste);
+        verify(notaRepository, times(3)).save(any(Nota.class));
+        verify(notaRepository, times(2)).findAllByTag(tagTeste);
 
     }
 
+    @Test
     void deveDarExcecaoEmAcharNotasPelaTag()
     {
         String tagTeste = "teste";
-        when(notaRepository.findAllByTag(tagTeste)).thenReturn(any());
-
-        assertThrows(ExceptionsNota.class, (Executable) notaService.exibirNotasPelaTag(tagTeste));
+        when(notaRepository.findAllByTag(tagTeste)).thenReturn(Collections.emptyList());
+        assertThrows(ExceptionsNota.class, () ->{
+            notaService.exibirNotasPelaTag(tagTeste);
+        });
 
         verify(notaRepository, times(1)).findAllByTag(tagTeste);
     }
 
+    @Test
     void deveDeletarTarefaDaNota()
     {
-        Tarefa tarefaTeste = new Tarefa();
-        tarefaService.atribuirTarefaANota(tarefaTeste.getId(), nota1.getId());
-        notaService.criarNota(nota1);
         List<Tarefa> listaEsperada = new ArrayList<>();
+        Tarefa tarefaTeste = new Tarefa();
+        tarefaTeste.setId(123l);
+        nota1.setTarefa(tarefaTeste);
+        notaService.criarNota(nota1);
+        when(notaRepository.findById(nota1.getId())).thenReturn(Optional.of(nota1));
 
-        when(notaService.deletarNota(tarefaTeste.getId())).thenReturn(anyList());
         notaService.deletarTarefaDeNota(nota1.getId(), tarefaTeste.getId());
         List<Tarefa> listaResultado = nota1.getTarefasRelacionadas();
-
         assertEquals(listaEsperada, listaResultado);
 
         verify(notaRepository, times(2)).save(nota1);
+        verify(tarefaRepository, times(1)).save(tarefaTeste);
 
     }
 

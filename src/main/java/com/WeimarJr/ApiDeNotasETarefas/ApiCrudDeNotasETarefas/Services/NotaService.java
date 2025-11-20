@@ -14,11 +14,9 @@ import java.util.Optional;
 @Service
 public class NotaService {
     private final NotaRepository notaRepository;
-    private final TarefaRepository tarefaRepository;
     public NotaService( NotaRepository notaRepository, TarefaRepository tarefaRepository)
     {
         this.notaRepository = notaRepository;
-        this.tarefaRepository = tarefaRepository;
     }
 
     public List<Nota> criarNota( Nota nota)
@@ -71,21 +69,4 @@ public class NotaService {
         }
     }
 
-    public List<Nota> deletarTarefaDeNota(Long idNota, Long idTarefa) throws ExceptionsNota, ExceptionsTarefa {
-        Optional<Nota> nota = notaRepository.findById(idNota);
-        Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
-        if(nota.isPresent())
-        {
-            if(tarefa.isPresent())
-            {
-                nota.get().deletarTarefa(tarefa.get());
-                editarNota(nota.get());
-                return listarNotas();
-            }else{
-                throw new ExceptionsTarefa("não existe tarefa com esse id");
-            }
-        }else{
-            throw new ExceptionsNota("não existe nota com esse id");
-        }
-    }
 }
