@@ -2,9 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -18,15 +16,15 @@ public class TarefaService {
     private final TarefaRepository tarefaRepository;
 
 
-    public TarefaService(TarefaRepository  tarefaRepository, NotaRepository notaRepository)
+    public TarefaService(TarefaRepository  tarefaRepository)
     {
         this.tarefaRepository = tarefaRepository;
     }
 
 
-    public List<Tarefa> criarTarefa(Tarefa tarefa) throws ExceptionsTarefa {
+    public Tarefa criarTarefa(Tarefa tarefa) throws ExceptionsTarefa {
         tarefaRepository.save(tarefa);
-        return listarTarefas();
+        return tarefa;
     }
 
     public List<Tarefa> listarTarefas() throws ExceptionsTarefa {
@@ -52,15 +50,16 @@ public class TarefaService {
         }
     }
 
-    public List<Tarefa> editarTarefa( Tarefa tarefa) throws ExceptionsTarefa {
+    public Tarefa editarTarefa( Tarefa tarefa) throws ExceptionsTarefa {
 
 
         acharPeloId(tarefa.getId());
         tarefaRepository.save(tarefa);
-        return listarTarefas();
+        return tarefa;
     }
 
     public List<Tarefa> deletarTarefa(Long id) throws ExceptionsTarefa {
+        acharPeloId(id);
         tarefaRepository.deleteById(id);
         return listarTarefas();
     }
@@ -75,16 +74,19 @@ public class TarefaService {
         }
     }
 
-    public List<Tarefa> mostrarTarefasConcluidasOuNao(String simOuNao) throws ExceptionsTarefa {
-        if(simOuNao.equalsIgnoreCase("sim"))
+    public List<Tarefa> mostrarTarefasConcluidasOuNao(Boolean simOuNao) throws ExceptionsTarefa {
+
+        if(simOuNao && !tarefaRepository.findAllByConcluida(true).isEmpty())
         {
            return tarefaRepository.findAllByConcluida(true);
-        } else if (simOuNao.equalsIgnoreCase("nao")) {
+        } else if (!simOuNao && !tarefaRepository.findAllByConcluida(false).isEmpty()) {
 
            return tarefaRepository.findAllByConcluida(false);
         }
-        else{
-            throw new ExceptionsTarefa("Nenhuma nota para o filtro aplicado");
+
+        else
+        {
+            throw new ExceptionsTarefa("Nenhuma tarefa encontrada com o status inserido");
         }
     }
 

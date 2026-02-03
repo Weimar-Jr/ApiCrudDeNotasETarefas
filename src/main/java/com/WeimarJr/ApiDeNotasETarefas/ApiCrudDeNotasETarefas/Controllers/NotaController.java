@@ -2,7 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesaTribuicaoTarefaNotaService;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesatribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.NotaService;
 import org.springframework.web.bind.annotation.*;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
@@ -14,8 +14,8 @@ import java.util.Optional;
 @RequestMapping("/Nota")
 public class NotaController {
     private final NotaService notaService;
-    private final AtribuicaoEDesaTribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
-    public NotaController(NotaService notaService, AtribuicaoEDesaTribuicaoTarefaNotaService desAtribuicao){
+    private final AtribuicaoEDesatribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
+    public NotaController(NotaService notaService, AtribuicaoEDesatribuicaoTarefaNotaService desAtribuicao){
         this.notaService = notaService;
         this.atribuicaoEDesaTribuicaoTarefaNotaService = desAtribuicao;
     }

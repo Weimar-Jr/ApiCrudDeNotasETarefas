@@ -155,9 +155,7 @@ class NotaServiceTest {
 
         when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
 
-        ExceptionsNota execao = assertThrows(ExceptionsNota.class, () -> {
-            notaService.deletarNota(notaNova.getId());
-        });
+        ExceptionsNota execao = assertThrows(ExceptionsNota.class, () -> notaService.deletarNota(notaNova.getId()));
 
         assertEquals("não existe nota com esse id.", execao.getMessage());
         verify(notaRepository, times(0)).deleteById(notaNova.getId());
@@ -194,9 +192,7 @@ class NotaServiceTest {
     {
         String tagTeste = "teste";
         when(notaRepository.findAllByTag(tagTeste)).thenReturn(Collections.emptyList());
-        assertThrows(ExceptionsNota.class, () ->{
-            notaService.exibirNotasPelaTag(tagTeste);
-        });
+        assertThrows(ExceptionsNota.class, () -> notaService.exibirNotasPelaTag(tagTeste));
 
         verify(notaRepository, times(1)).findAllByTag(tagTeste);
     }

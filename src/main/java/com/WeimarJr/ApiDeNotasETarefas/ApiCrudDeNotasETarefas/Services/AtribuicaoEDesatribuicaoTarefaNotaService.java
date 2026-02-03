@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AtribuicaoEDesaTribuicaoTarefaNotaService {
+public class AtribuicaoEDesatribuicaoTarefaNotaService {
     private final TarefaRepository tarefaRepository;
     private final NotaRepository notaRepository;
 
-    public AtribuicaoEDesaTribuicaoTarefaNotaService( TarefaRepository tarefaRepository1, NotaRepository notaRepository1)
+    public AtribuicaoEDesatribuicaoTarefaNotaService(TarefaRepository tarefaRepository1, NotaRepository notaRepository1)
     {
         this.notaRepository = notaRepository1;
         this.tarefaRepository = tarefaRepository1;

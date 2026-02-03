@@ -2,7 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesaTribuicaoTarefaNotaService;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesatribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.TarefaService;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +13,8 @@ import java.util.List;
 public class TarefaController {
 
     private final TarefaService tarefaService;
-    private final AtribuicaoEDesaTribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
-    public TarefaController( TarefaService tarefaService, AtribuicaoEDesaTribuicaoTarefaNotaService atribuicao)
+    private final AtribuicaoEDesatribuicaoTarefaNotaService atribuicaoEDesaTribuicaoTarefaNotaService;
+    public TarefaController( TarefaService tarefaService, AtribuicaoEDesatribuicaoTarefaNotaService atribuicao)
     {
         this.tarefaService = tarefaService;
         this.atribuicaoEDesaTribuicaoTarefaNotaService = atribuicao;
@@ -31,7 +31,7 @@ public class TarefaController {
     }
 
     @GetMapping("/concluidas/{sim-ou-nao}")
-    List<Tarefa> mostrarTarefasConcluidasOuNao(@PathVariable("sim-ou-nao") String simOuNao) throws ExceptionsTarefa {
+    List<Tarefa> mostrarTarefasConcluidasOuNao(@PathVariable("sim-ou-nao") boolean simOuNao) throws ExceptionsTarefa {
         return tarefaService.mostrarTarefasConcluidasOuNao(simOuNao);
     }
 
