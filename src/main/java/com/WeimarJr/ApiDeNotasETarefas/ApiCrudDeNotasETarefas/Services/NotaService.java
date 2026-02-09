@@ -1,9 +1,7 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
@@ -19,10 +17,10 @@ public class NotaService {
         this.notaRepository = notaRepository;
     }
 
-    public List<Nota> criarNota( Nota nota)
+    public Nota criarNota( Nota nota)
     {
         notaRepository.save(nota);
-        return  listarNotas();
+        return  nota;
 
     }
 
@@ -31,41 +29,40 @@ public class NotaService {
         return notaRepository.findAll();
     }
 
-    public List<Nota> editarNota(Nota nota ) throws ExceptionsNota {
+    public Nota editarNota(Nota nota ) throws NotaException {
         Optional<Nota> seNotaExiste= mostrarNotaEspecificaPeloId(nota.getId());
         if(seNotaExiste.isPresent()){
         notaRepository.save(nota);
+            return nota;
         }else{
-            throw new ExceptionsNota("não existe esta nota no sistema.");
+            throw new NotaException("não existe esta nota no sistema.");
         }
-        return listarNotas();
     }
 
-    public List<Nota> deletarNota(Long id) throws ExceptionsNota {
+    public void deletarNota(Long id) throws NotaException {
        if(mostrarNotaEspecificaPeloId(id).isPresent()){
            notaRepository.deleteById(id);
-           System.out.println("nota deletada");
-           return  listarNotas();
        }
        else {
-           throw new ExceptionsNota("não existe nota com esse id para poder ser deletada.");
+           throw new NotaException("não existe nota com esse id para poder ser deletada.");
        }
     }
 
-    public Optional<Nota> mostrarNotaEspecificaPeloId(Long id) throws ExceptionsNota {
-        if(notaRepository.findById(id).isPresent()) {
-            return notaRepository.findById(id);
+    public Optional<Nota> mostrarNotaEspecificaPeloId(Long id) throws NotaException {
+        Optional<Nota> nota = notaRepository.findById(id);
+        if(nota.isPresent()) {
+            return nota;
         }else{
-            throw new ExceptionsNota("não existe nota com esse id.");
+            throw new NotaException("não existe nota com esse id.");
         }
     }
 
-    public List<Nota> exibirNotasPelaTag(String tag ) throws ExceptionsNota {
+    public List<Nota> exibirNotasPelaTag(String tag ) throws NotaException {
         List<Nota> notas = notaRepository.findAllByTag(tag);
         if(!notas.isEmpty()) {
             return notaRepository.findAllByTag(tag);
         }else{
-            throw new ExceptionsNota("não tem notas com essa tag.");
+            throw new NotaException("não tem notas com essa tag.");
         }
     }
 

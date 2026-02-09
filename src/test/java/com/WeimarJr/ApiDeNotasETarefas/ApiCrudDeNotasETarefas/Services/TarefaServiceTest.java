@@ -1,7 +1,7 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +66,7 @@ public class TarefaServiceTest {
     void deveListarTarefaExcecaoTest()
     {
         when(tarefaRepository.findAll(any(Sort.class))).thenReturn(Collections.emptyList());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.listarTarefas());
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.listarTarefas());
         assertEquals("Sem tarefas criadas para exibir.", ex.getMessage());
         verify(tarefaRepository, times(1)).findAll(any(Sort.class));
     }
@@ -87,7 +87,7 @@ public class TarefaServiceTest {
     void deveAcharTarefaPeloIdExecaoTest()
     {
         when(tarefaRepository.findById(20L)).thenReturn(Optional.empty());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.acharPeloId(20L));
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.acharPeloId(20L));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(20L);
     }
@@ -109,7 +109,7 @@ public class TarefaServiceTest {
         Tarefa tarefaEditada = new Tarefa();
         tarefaEditada.setId(55L);
         when(tarefaRepository.findById(tarefaEditada.getId())).thenReturn(Optional.empty());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.editarTarefa(tarefaEditada));
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.editarTarefa(tarefaEditada));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(tarefaEditada.getId());
     }
@@ -128,8 +128,6 @@ public class TarefaServiceTest {
         when(tarefaRepository.save(tarefaEditada)).thenReturn(tarefaEditada);
 
         Tarefa tarefaRetornada = tarefaService.editarTarefa(tarefaEditada);
-        System.out.println(tarefaAntiga.getNomeTarefa());
-        System.out.println(tarefaRetornada.getNomeTarefa());
         assertNotEquals(nomeTarefaAntiga, nomeTarefaAtual);
         verify(tarefaRepository,times(1)).findById(tarefaAntiga.getId());
         verify(tarefaRepository,times(1)).save(tarefaEditada);
@@ -140,7 +138,7 @@ public class TarefaServiceTest {
     void deveDeletarTarefaExecaoTest()
     {
         when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.deletarTarefa(99L));
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.deletarTarefa(99L));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(99L);
     }
@@ -149,13 +147,9 @@ public class TarefaServiceTest {
     void deveDeletarTarefaTest()
     {
         when(tarefaRepository.findById(tarefa1.getId())).thenReturn(Optional.of(tarefa1));
-        when(tarefaRepository.findAll(any(Sort.class))).thenReturn(List.of(tarefa2));
-        List<Tarefa> listaRetornada = tarefaService.deletarTarefa(tarefa1.getId());
-        assertEquals(1, listaRetornada.size());
-        assertEquals(tarefa2, listaRetornada.getFirst());
+        tarefaService.deletarTarefa(tarefa1.getId());
         verify(tarefaRepository, times(1)).findById(tarefa1.getId());
         verify(tarefaRepository, times(1)).deleteById(tarefa1.getId());
-        verify(tarefaRepository, times(1)).findAll(any(Sort.class));
 
     }
 
@@ -163,7 +157,7 @@ public class TarefaServiceTest {
     void deveMostrarTarefasPelaPrioridadeExecaoTest()
     {
         when(tarefaRepository.findAllByPrioridade(10)).thenReturn(Collections.emptyList());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.mostrarTarefasPelaPrioridade(10));
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.mostrarTarefasPelaPrioridade(10));
         assertEquals("Nenhuma tarefa com a prioridade inserida", ex.getMessage());
         verify(tarefaRepository, times(1)).findAllByPrioridade(10);
     }
@@ -184,7 +178,7 @@ public class TarefaServiceTest {
     void deveMostrarTarefasConcluidasOuNaoConcluidasExcecaoTest()
     {
         when(tarefaRepository.findAllByConcluida(true)).thenReturn(Collections.emptyList());
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> tarefaService.mostrarTarefasConcluidasOuNao(true));
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.mostrarTarefasConcluidasOuNao(true));
         assertEquals("Nenhuma tarefa encontrada com o status inserido", ex.getMessage());
         verify(tarefaRepository, times(1)).findAllByConcluida(true);
 

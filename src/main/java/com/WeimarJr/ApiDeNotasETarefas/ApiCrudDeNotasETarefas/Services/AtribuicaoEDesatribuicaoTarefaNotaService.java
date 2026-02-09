@@ -2,8 +2,8 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
@@ -16,45 +16,40 @@ public class AtribuicaoEDesatribuicaoTarefaNotaService {
     private final TarefaRepository tarefaRepository;
     private final NotaRepository notaRepository;
 
-    public AtribuicaoEDesatribuicaoTarefaNotaService(TarefaRepository tarefaRepository1, NotaRepository notaRepository1)
-    {
+    public AtribuicaoEDesatribuicaoTarefaNotaService(TarefaRepository tarefaRepository1, NotaRepository notaRepository1) {
         this.notaRepository = notaRepository1;
         this.tarefaRepository = tarefaRepository1;
     }
 
-    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws ExceptionsTarefa {
+    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws TarefaException {
         Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
-        if(tarefa.isPresent())
-        {
+        if (tarefa.isPresent()) {
             Optional<Nota> nota = notaRepository.findById(idNota);
-            if(nota.isPresent())
-            {
-                nota.get().setTarefa(tarefa.get());
+            if (nota.isPresent()) {
+                nota.get().adicionarTarefa(tarefa.get());
                 tarefa.get().setNota(nota.get());
                 System.out.println("Tarefa atribuida a nota");
                 return notaRepository.listarTarefasDaNota(idNota);
-            }else{
-                throw new ExceptionsTarefa("não foi achada a nota pelo id");
+            } else {
+                throw new TarefaException("não foi achada a nota pelo id");
             }
-        }else{
-            throw new ExceptionsTarefa("não foi achada a tarefa pelo id");
+        } else {
+            throw new TarefaException("não foi achada a tarefa pelo id");
         }
     }
 
-    public List<Tarefa> deletarTarefaDeNota(Long idNota, Long idTarefa) throws ExceptionsNota, ExceptionsTarefa {
+    public List<Tarefa> deletarTarefaDeNota(Long idNota, Long idTarefa) throws NotaException, TarefaException {
         Optional<Nota> nota = notaRepository.findById(idNota);
         Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
-        if(nota.isPresent())
-        {
-            if(tarefa.isPresent())
-            {
-                nota.get().deletarTarefa(tarefa.get());
+        if (nota.isPresent()) {
+            if (tarefa.isPresent()) {
+                nota.get().removerTarefa(tarefa.get());
                 return notaRepository.listarTarefasDaNota(idNota);
-            }else{
-                throw new ExceptionsTarefa("não existe tarefa com esse id");
+            } else {
+                throw new TarefaException("não existe tarefa com esse id");
             }
-        }else{
-            throw new ExceptionsNota("não existe nota com esse id");
+        } else {
+            throw new NotaException("não existe nota com esse id");
         }
     }
 }

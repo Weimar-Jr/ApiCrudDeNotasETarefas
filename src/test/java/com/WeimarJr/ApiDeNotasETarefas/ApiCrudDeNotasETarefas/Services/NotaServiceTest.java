@@ -1,14 +1,14 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,6 @@ class NotaServiceTest {
         List<Nota> notas = notaService.listarNotas();
         assertTrue(notas.isEmpty(), " a lista deve estar vazia.");
         verify(notaRepository, times(1)).findAll();
-        System.out.println("a lista esta vazia");
     }
 
     @Test
@@ -81,8 +80,7 @@ class NotaServiceTest {
         assertEquals(listaEsperada, listaResultado);
         verify(notaRepository, times(1)).save(nota1);
         verify(notaRepository, times(1)).save(nota2);
-        verify(notaRepository, times(3)).findAll();
-        System.out.println("lista de objetos retornada com sucesso");
+        verify(notaRepository, times(1)).findAll();
 
     }
 
@@ -90,23 +88,28 @@ class NotaServiceTest {
     @Test
     void deveEditarNota() {
 
-        notaService.criarNota(nota2);
-        Nota nota2Editada = nota2;
-        String tituloEsperado = "nota editada";
-        nota2Editada.setTituloNota(tituloEsperado);
-        List<Nota> listaComOObjetoEsperado = List.of(nota2Editada);
-        when(notaRepository.findById(nota2.getId())).thenReturn(Optional.of(nota2));
-        when(notaRepository.findAll()).thenReturn(listaComOObjetoEsperado);
+        Long id = 22L;
+        Nota notaExistente = new Nota();
+        notaExistente.setId(id);
+        notaExistente.setTituloNota("titulo antigo");
+        notaExistente.setNota("conteudo");
+        Nota notaEditada = new Nota();
+        notaEditada.setId(id);
+        notaEditada.setTituloNota("nota editada");
+        notaEditada.setNota("conteudo");
 
-        notaService.editarNota(nota2Editada);
+        when(notaRepository.findById(id)).thenReturn(Optional.of(notaExistente));
+        when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Nota resultado = notaService.editarNota(notaEditada);
+        ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
+        verify(notaRepository, times(1)).findById(id);
+        verify(notaRepository, times(1)).save(captor.capture());
+        Nota salvo = captor.getValue(); assertEquals(id, salvo.getId()); assertEquals("nota editada", salvo.getTituloNota());
+        assertEquals("conteudo", salvo.getNota());
+        assertEquals("nota editada", resultado.getTituloNota()); verifyNoMoreInteractions(notaRepository);
 
 
-
-        assertEquals(tituloEsperado, listaComOObjetoEsperado.getFirst().getTituloNota());
-
-        verify(notaRepository, times(2)).findAll();
-        verify(notaRepository, times(2)).save(nota2Editada);
-        verify(notaRepository, times(2)).findById(nota2.getId());
 
     }
 
@@ -117,7 +120,7 @@ class NotaServiceTest {
         notaNova.setId(123L);
         when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
 
-        ExceptionsNota excecao = assertThrows(ExceptionsNota.class, () -> notaService.editarNota(notaNova));
+        NotaException excecao = assertThrows(NotaException.class, () -> notaService.editarNota(notaNova));
 
         assertEquals("não existe nota com esse id.", excecao.getMessage());
 
@@ -129,21 +132,9 @@ class NotaServiceTest {
     @Test
     void deveApagarANota()
     {
-        notaService.criarNota(nota1);
-        notaService.criarNota(nota2);
-        List<Nota> listaEsperada = new ArrayList<>();
-        listaEsperada.add(nota2);
-
         when(notaRepository.findById(nota1.getId())).thenReturn(Optional.of(nota1));
-        when(notaService.deletarNota(nota1.getId())).thenReturn(listaEsperada);
-
         notaService.deletarNota(nota1.getId());
-        List<Nota> listaResultado = notaService.listarNotas();
-        assertEquals(listaEsperada, listaResultado);
-        assertEquals(nota2.getId(), listaResultado.getFirst().getId());
-
-        verify(notaRepository, times(4)).findAll();
-        verify(notaRepository, times(2)).deleteById(nota1.getId());
+        verify(notaRepository, times(1)).deleteById(nota1.getId());
 
     }
 
@@ -155,12 +146,11 @@ class NotaServiceTest {
 
         when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
 
-        ExceptionsNota execao = assertThrows(ExceptionsNota.class, () -> notaService.deletarNota(notaNova.getId()));
+        NotaException execao = assertThrows(NotaException.class, () -> notaService.deletarNota(notaNova.getId()));
 
         assertEquals("não existe nota com esse id.", execao.getMessage());
         verify(notaRepository, times(0)).deleteById(notaNova.getId());
         verify(notaRepository, times(1)).findById(notaNova.getId());
-        System.out.println(execao.getMessage());
 
     }
 
@@ -192,7 +182,7 @@ class NotaServiceTest {
     {
         String tagTeste = "teste";
         when(notaRepository.findAllByTag(tagTeste)).thenReturn(Collections.emptyList());
-        assertThrows(ExceptionsNota.class, () -> notaService.exibirNotasPelaTag(tagTeste));
+        assertThrows(NotaException.class, () -> notaService.exibirNotasPelaTag(tagTeste));
 
         verify(notaRepository, times(1)).findAllByTag(tagTeste);
     }

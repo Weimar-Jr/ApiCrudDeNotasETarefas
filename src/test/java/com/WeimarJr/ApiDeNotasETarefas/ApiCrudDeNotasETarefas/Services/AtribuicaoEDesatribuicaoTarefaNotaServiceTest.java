@@ -2,7 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
     {
         when(tarefaRepository.findById(1L)).thenReturn(java.util.Optional.empty());
 
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
+        TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
         assertEquals("não foi achada a tarefa pelo id", ex.getMessage());
         verify(tarefaRepository).findById(1L);
     }
@@ -58,7 +58,7 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
         when(tarefaRepository.findById(1L)).thenReturn(java.util.Optional.of(tarefa1));
         when(notaRepository.findById(2L)).thenReturn(java.util.Optional.empty());
 
-        ExceptionsTarefa ex = assertThrows(ExceptionsTarefa.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
+        TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
         assertEquals("não foi achada a nota pelo id", ex.getMessage());
         verify(tarefaRepository).findById(1L);
         verify(notaRepository).findById(2L);

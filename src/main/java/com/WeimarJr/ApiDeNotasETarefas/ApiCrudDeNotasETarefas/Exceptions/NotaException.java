@@ -1,7 +1,7 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions;
 
-public class ExceptionsNota extends RuntimeException {
-    public ExceptionsNota(String mensagem)
+public class NotaException extends RuntimeException {
+    public NotaException(String mensagem)
     {
         super(mensagem);
     }

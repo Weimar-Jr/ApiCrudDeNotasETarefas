@@ -5,8 +5,8 @@ import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesatribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.NotaService;
 import org.springframework.web.bind.annotation.*;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsNota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,29 +34,29 @@ public class NotaController {
     }
 
     @PutMapping
-    public  List<Nota> atualizarNota( @RequestBody Nota nota) throws ExceptionsNota {
+    public  List<Nota> atualizarNota( @RequestBody Nota nota) throws NotaException {
         notaService.editarNota(nota);
         return listarNotas();
     }
 
     @DeleteMapping("/{id}")
-    public  List<Nota> deletarNota(@PathVariable("id") Long id) throws ExceptionsNota {
+    public  List<Nota> deletarNota(@PathVariable("id") Long id) throws NotaException {
         notaService.deletarNota(id);
         return listarNotas();
     }
 
     @GetMapping("/pelo-id/{id}")
-    public  Optional<Nota> notaPeloId(@PathVariable("id") Long id) throws ExceptionsNota {
+    public  Optional<Nota> notaPeloId(@PathVariable("id") Long id) throws NotaException {
         return notaService.mostrarNotaEspecificaPeloId(id);
     }
 
     @GetMapping("/pela-tag/{tag}")
-    public  List<Nota> notasComATag(@PathVariable("tag") String tag) throws ExceptionsNota {
+    public  List<Nota> notasComATag(@PathVariable("tag") String tag) throws NotaException {
         return notaService.exibirNotasPelaTag(tag);
     }
 
     @DeleteMapping("/deletar-tarefa-da-nota/{idNota}/{idTarefa}")
-    public  List<Tarefa> deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws ExceptionsNota, ExceptionsTarefa {
+    public  List<Tarefa> deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws NotaException, TarefaException {
          return atribuicaoEDesaTribuicaoTarefaNotaService.deletarTarefaDeNota(idNota, idTarefa);
     }
 }

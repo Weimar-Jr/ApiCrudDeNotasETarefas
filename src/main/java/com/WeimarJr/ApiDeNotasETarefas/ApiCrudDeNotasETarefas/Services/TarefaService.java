@@ -1,7 +1,7 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.ExceptionsTarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.springframework.data.domain.Sort;
@@ -22,12 +22,12 @@ public class TarefaService {
     }
 
 
-    public Tarefa criarTarefa(Tarefa tarefa) throws ExceptionsTarefa {
+    public Tarefa criarTarefa(Tarefa tarefa) throws TarefaException {
         tarefaRepository.save(tarefa);
         return tarefa;
     }
 
-    public List<Tarefa> listarTarefas() throws ExceptionsTarefa {
+    public List<Tarefa> listarTarefas() throws TarefaException {
         Sort prioridade = Sort.by(Sort.Direction.ASC, "prioridade");
         List<Tarefa> lista = tarefaRepository.findAll(prioridade);
         if(!lista.isEmpty())
@@ -35,22 +35,22 @@ public class TarefaService {
             return lista;
         }
         else{
-            throw new ExceptionsTarefa("Sem tarefas criadas para exibir.");
+            throw new TarefaException("Sem tarefas criadas para exibir.");
         }
     }
 
-    public Optional<Tarefa> acharPeloId(Long id) throws ExceptionsTarefa {
+    public Optional<Tarefa> acharPeloId(Long id) throws TarefaException {
         Optional <Tarefa> tarefa1= tarefaRepository.findById(id);
         if(tarefa1.isPresent())
         {
             return tarefa1;
         }
         else {
-            throw new ExceptionsTarefa("tarefa não existe.");
+            throw new TarefaException("tarefa não existe.");
         }
     }
 
-    public Tarefa editarTarefa( Tarefa tarefa) throws ExceptionsTarefa {
+    public Tarefa editarTarefa( Tarefa tarefa) throws TarefaException {
 
 
         acharPeloId(tarefa.getId());
@@ -58,23 +58,22 @@ public class TarefaService {
         return tarefa;
     }
 
-    public List<Tarefa> deletarTarefa(Long id) throws ExceptionsTarefa {
+    public void deletarTarefa(Long id) throws TarefaException {
         acharPeloId(id);
         tarefaRepository.deleteById(id);
-        return listarTarefas();
     }
 
-    public List<Tarefa> mostrarTarefasPelaPrioridade( int prioridade) throws ExceptionsTarefa {
+    public List<Tarefa> mostrarTarefasPelaPrioridade( int prioridade) throws TarefaException {
         List<Tarefa> lista = tarefaRepository.findAllByPrioridade(prioridade);
         if(!lista.isEmpty())
         {
             return lista;
         }else{
-            throw new ExceptionsTarefa("Nenhuma tarefa com a prioridade inserida");
+            throw new TarefaException("Nenhuma tarefa com a prioridade inserida");
         }
     }
 
-    public List<Tarefa> mostrarTarefasConcluidasOuNao(Boolean simOuNao) throws ExceptionsTarefa {
+    public List<Tarefa> mostrarTarefasConcluidasOuNao(Boolean simOuNao) throws TarefaException {
 
         if(simOuNao && !tarefaRepository.findAllByConcluida(true).isEmpty())
         {
@@ -86,7 +85,7 @@ public class TarefaService {
 
         else
         {
-            throw new ExceptionsTarefa("Nenhuma tarefa encontrada com o status inserido");
+            throw new TarefaException("Nenhuma tarefa encontrada com o status inserido");
         }
     }
 

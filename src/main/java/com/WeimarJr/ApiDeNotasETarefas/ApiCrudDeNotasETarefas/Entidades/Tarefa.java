@@ -17,6 +17,7 @@ public class Tarefa {
     @Getter @Setter
     private Long id;
 
+
     @Column(nullable = false, name = "nome_da_tarefa")
     @Getter @Setter private String nomeTarefa;
     @Column(nullable = true, name = "descricao_da_tarefa")
