@@ -27,13 +27,14 @@ public class TarefaServiceTest {
     private TarefaRepository tarefaRepository;
 
 
-    Tarefa tarefa1 = new Tarefa();
-    Tarefa tarefa2 = new Tarefa();
+    Tarefa tarefa1;
+    Tarefa tarefa2;
 
     @BeforeEach
     void tarefaParaTestes()
     {
-
+            tarefa1 = new Tarefa();
+            tarefa2 = new Tarefa();
             tarefa1.setId(123L);
             tarefa1.setNomeTarefa("primeiro teste");
             tarefa1.setDescricaoTarefa("descrição");
@@ -53,13 +54,21 @@ public class TarefaServiceTest {
     void deveSalvarTarefaTest()
     {
         when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tarefaRepository.save(tarefa2)).thenAnswer(invocation -> invocation.getArgument(0));
         Tarefa tarefaRetornada1 =  tarefaService.criarTarefa(tarefa1);
-        Tarefa tarefaRetornada2 =  tarefaService.criarTarefa(tarefa2);
-        assertEquals(tarefa1, tarefaRetornada1);
-        assertEquals(tarefa2, tarefaRetornada2);
-
-        verify(tarefaRepository, times(2)).save(any(Tarefa.class));
+        ArgumentCaptor<Tarefa> captor = ArgumentCaptor.forClass(Tarefa.class);
+        verify(tarefaRepository, times(1)).save(captor.capture());
+        Tarefa salvo = captor.getValue();
+        assertEquals(tarefa1.getId(), salvo.getId());
+        assertEquals(tarefa1.getNomeTarefa(), salvo.getNomeTarefa());
+        assertEquals(tarefa1.getDescricaoTarefa(), salvo.getDescricaoTarefa());
+        assertEquals(tarefa1.getPrioridade(), salvo.getPrioridade());
+        assertEquals(tarefa1.getConcluida(), salvo.getConcluida());
+        assertEquals(tarefa1.getId(), tarefaRetornada1.getId());
+        assertEquals(tarefa1.getNomeTarefa(), tarefaRetornada1.getNomeTarefa());
+        assertEquals(tarefa1.getDescricaoTarefa(), tarefaRetornada1.getDescricaoTarefa());
+        assertEquals(tarefa1.getPrioridade(), tarefaRetornada1.getPrioridade());
+        assertEquals(tarefa1.getConcluida(), tarefaRetornada1.getConcluida());
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -69,6 +78,7 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.listarTarefas());
         assertEquals("Sem tarefas criadas para exibir.", ex.getMessage());
         verify(tarefaRepository, times(1)).findAll(any(Sort.class));
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -76,11 +86,10 @@ public class TarefaServiceTest {
     {
         List<Tarefa> listaEsperada = List.of(tarefa1,tarefa2);
         when(tarefaRepository.findAll(any(Sort.class))).thenReturn(listaEsperada);
-
         List<Tarefa> listaRetornada = tarefaService.listarTarefas();
-
         assertEquals(listaEsperada, listaRetornada);
         verify(tarefaRepository, times(1)).findAll(any(Sort.class));
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -90,6 +99,7 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.acharPeloId(20L));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(20L);
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -100,6 +110,7 @@ public class TarefaServiceTest {
         Optional<Tarefa> tarefaRetornada = tarefaService.acharPeloId(tarefa1.getId());
         assertEquals(tarefaEsperada, tarefaRetornada.get());
         verify(tarefaRepository, times(1)).findById(tarefa1.getId());
+        verifyNoMoreInteractions(tarefaRepository);
 
     }
 
@@ -112,26 +123,44 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.editarTarefa(tarefaEditada));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(tarefaEditada.getId());
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
     void deveEditartarefaTest()
     {
+        Long id = 22L;
         Tarefa tarefaAntiga = new Tarefa();
-        tarefaAntiga.setId(22L);
+        tarefaAntiga.setId(id);
         tarefaAntiga.setNomeTarefa("teste");
-        String nomeTarefaAntiga = tarefaAntiga.getNomeTarefa();
-        Tarefa tarefaEditada = tarefaAntiga;
-        tarefaEditada.setNomeTarefa("nome diferente");
-        String nomeTarefaAtual = tarefaEditada.getNomeTarefa();
-        when(tarefaRepository.findById(tarefaAntiga.getId())).thenReturn(Optional.of(tarefaAntiga));
-        when(tarefaRepository.save(tarefaEditada)).thenReturn(tarefaEditada);
+        tarefaAntiga.setDescricaoTarefa("descrição");
+        tarefaAntiga.setPrioridade(4);
+        tarefaAntiga.setConcluida(false);
 
-        Tarefa tarefaRetornada = tarefaService.editarTarefa(tarefaEditada);
-        assertNotEquals(nomeTarefaAntiga, nomeTarefaAtual);
-        verify(tarefaRepository,times(1)).findById(tarefaAntiga.getId());
-        verify(tarefaRepository,times(1)).save(tarefaEditada);
+        Tarefa tarefaEditada = new Tarefa();
+        tarefaEditada.setId(id);
+        tarefaEditada.setNomeTarefa("teste editado");
+        tarefaEditada.setDescricaoTarefa("descrição editada");
+        tarefaEditada.setPrioridade(2);
+        tarefaEditada.setConcluida(true);
 
+        when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefaAntiga));
+        when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Tarefa resultado = tarefaService.editarTarefa(tarefaEditada);
+        ArgumentCaptor<Tarefa> captor = ArgumentCaptor.forClass(Tarefa.class);
+        verify(tarefaRepository, times(1)).findById(id);
+        verify(tarefaRepository, times(1)).save(captor.capture());
+        Tarefa salvo = captor.getValue();
+        assertEquals(id, salvo.getId());
+        assertEquals("teste editado", salvo.getNomeTarefa());
+        assertEquals("descrição editada", salvo.getDescricaoTarefa());
+        assertEquals(2, salvo.getPrioridade());
+        assertEquals(true, salvo.getConcluida());
+        assertEquals("teste editado", resultado.getNomeTarefa());
+        assertEquals("descrição editada", resultado.getDescricaoTarefa());
+        assertEquals(2, resultado.getPrioridade());
+        assertEquals(true, resultado.getConcluida());
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -141,6 +170,7 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.deletarTarefa(99L));
         assertEquals("tarefa não existe.", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(99L);
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -150,6 +180,7 @@ public class TarefaServiceTest {
         tarefaService.deletarTarefa(tarefa1.getId());
         verify(tarefaRepository, times(1)).findById(tarefa1.getId());
         verify(tarefaRepository, times(1)).deleteById(tarefa1.getId());
+        verifyNoMoreInteractions(tarefaRepository);
 
     }
 
@@ -160,6 +191,7 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.mostrarTarefasPelaPrioridade(10));
         assertEquals("Nenhuma tarefa com a prioridade inserida", ex.getMessage());
         verify(tarefaRepository, times(1)).findAllByPrioridade(10);
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -170,8 +202,10 @@ public class TarefaServiceTest {
         List<Tarefa> listaEsperada = List.of(tarefa1);
         when(tarefaRepository.findAllByPrioridade(3)).thenReturn(listaEsperada);
         List<Tarefa> listaRetornada = tarefaService.mostrarTarefasPelaPrioridade(3);
-        assertEquals(listaEsperada, listaRetornada);
+        assertEquals(listaEsperada.size(), listaRetornada.size());
+        assertEquals(listaEsperada.get(0), listaRetornada.get(0));
         verify(tarefaRepository, times(1)).findAllByPrioridade(3);
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
@@ -181,27 +215,28 @@ public class TarefaServiceTest {
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.mostrarTarefasConcluidasOuNao(true));
         assertEquals("Nenhuma tarefa encontrada com o status inserido", ex.getMessage());
         verify(tarefaRepository, times(1)).findAllByConcluida(true);
+        verifyNoMoreInteractions(tarefaRepository);
 
     }
 
-    @Test
-    void deveMostrarTarefasConcluidasOuNaoConcluidasTest()
+    @Test void deveMostrarTarefasNaoConcluidas()
     {
         tarefa1.setConcluida(false);
+        List<Tarefa> listaEsperada = List.of(tarefa1);
+        when(tarefaRepository.findAllByConcluida(false)).thenReturn(listaEsperada);
+        List<Tarefa> resultado = tarefaService.mostrarTarefasConcluidasOuNao(false);
+        assertEquals(listaEsperada, resultado); verify(tarefaRepository, times(1)).findAllByConcluida(false);
+        verifyNoMoreInteractions(tarefaRepository);
+    }
+    @Test void deveMostrarTarefasConcluidas()
+    {
         tarefa2.setConcluida(true);
-
-        List<Tarefa> listaEsperadaNaoConcluida = List.of(tarefa1);
-        when(tarefaRepository.findAllByConcluida(false)).thenReturn(listaEsperadaNaoConcluida);
-        List<Tarefa> listaRetornadaNaoConcluida = tarefaService.mostrarTarefasConcluidasOuNao(false);
-        assertEquals(listaEsperadaNaoConcluida, listaRetornadaNaoConcluida);
-        verify(tarefaRepository, times(2)).findAllByConcluida(false);
-
-        List<Tarefa> listaEsperadaConcluida = List.of(tarefa2);
-        when(tarefaRepository.findAllByConcluida(true)).thenReturn(listaEsperadaConcluida);
-        List<Tarefa> listaRetornada = tarefaService.mostrarTarefasConcluidasOuNao(true);
-        assertEquals(listaEsperadaConcluida, listaRetornada);
-        verify(tarefaRepository, times(2)).findAllByConcluida(true);
-
+        List<Tarefa> listaEsperada = List.of(tarefa2);
+        when(tarefaRepository.findAllByConcluida(true)).thenReturn(listaEsperada);
+        List<Tarefa> resultado = tarefaService.mostrarTarefasConcluidasOuNao(true);
+        assertEquals(listaEsperada, resultado);
+        verify(tarefaRepository, times(1)).findAllByConcluida(true);
+        verifyNoMoreInteractions(tarefaRepository);
     }
 
 }

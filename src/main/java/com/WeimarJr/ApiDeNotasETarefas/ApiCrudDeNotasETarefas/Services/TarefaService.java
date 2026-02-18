@@ -41,7 +41,7 @@ public class TarefaService {
 
     public Optional<Tarefa> acharPeloId(Long id) throws TarefaException {
         Optional <Tarefa> tarefa1= tarefaRepository.findById(id);
-        if(tarefa1.isPresent())
+        if(!tarefa1.isEmpty())
         {
             return tarefa1;
         }
@@ -54,13 +54,14 @@ public class TarefaService {
 
 
         acharPeloId(tarefa.getId());
-        tarefaRepository.save(tarefa);
-        return tarefa;
+        return tarefaRepository.save(tarefa);
+
     }
 
     public void deletarTarefa(Long id) throws TarefaException {
         acharPeloId(id);
         tarefaRepository.deleteById(id);
+
     }
 
     public List<Tarefa> mostrarTarefasPelaPrioridade( int prioridade) throws TarefaException {
@@ -75,12 +76,10 @@ public class TarefaService {
 
     public List<Tarefa> mostrarTarefasConcluidasOuNao(Boolean simOuNao) throws TarefaException {
 
-        if(simOuNao && !tarefaRepository.findAllByConcluida(true).isEmpty())
+        List<Tarefa> tarefas = tarefaRepository.findAllByConcluida(simOuNao);
+        if(!tarefas.isEmpty())
         {
-           return tarefaRepository.findAllByConcluida(true);
-        } else if (!simOuNao && !tarefaRepository.findAllByConcluida(false).isEmpty()) {
-
-           return tarefaRepository.findAllByConcluida(false);
+            return tarefas;
         }
 
         else

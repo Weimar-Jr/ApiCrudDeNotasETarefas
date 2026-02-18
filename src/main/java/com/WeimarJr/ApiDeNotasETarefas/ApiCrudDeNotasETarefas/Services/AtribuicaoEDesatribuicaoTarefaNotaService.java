@@ -21,30 +21,28 @@ public class AtribuicaoEDesatribuicaoTarefaNotaService {
         this.tarefaRepository = tarefaRepository1;
     }
 
-    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws TarefaException {
+    public List<Tarefa> atribuirTarefaANota(Long idTarefa, Long idNota) throws TarefaException, NotaException {
         Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
-        if (tarefa.isPresent()) {
+        if (!tarefa.isEmpty()) {
             Optional<Nota> nota = notaRepository.findById(idNota);
             if (nota.isPresent()) {
                 nota.get().adicionarTarefa(tarefa.get());
                 tarefa.get().setNota(nota.get());
-                System.out.println("Tarefa atribuida a nota");
                 return notaRepository.listarTarefasDaNota(idNota);
             } else {
-                throw new TarefaException("não foi achada a nota pelo id");
+                throw new NotaException("não foi achada a nota pelo id");
             }
         } else {
             throw new TarefaException("não foi achada a tarefa pelo id");
         }
     }
 
-    public List<Tarefa> deletarTarefaDeNota(Long idNota, Long idTarefa) throws NotaException, TarefaException {
+    public void deletarTarefaDeNota(Long idNota, Long idTarefa) throws NotaException, TarefaException {
         Optional<Nota> nota = notaRepository.findById(idNota);
         Optional<Tarefa> tarefa = tarefaRepository.findById(idTarefa);
         if (nota.isPresent()) {
             if (tarefa.isPresent()) {
                 nota.get().removerTarefa(tarefa.get());
-                return notaRepository.listarTarefasDaNota(idNota);
             } else {
                 throw new TarefaException("não existe tarefa com esse id");
             }

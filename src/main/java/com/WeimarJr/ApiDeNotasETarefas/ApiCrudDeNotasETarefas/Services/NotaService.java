@@ -26,26 +26,26 @@ public class NotaService {
 
     public List<Nota> listarNotas()
     {
-        return notaRepository.findAll();
+        List<Nota> notas = notaRepository.findAll();
+        if(!notas.isEmpty()) {
+            return notas;
+        }else {
+            throw new NotaException("não tem notas cadastradas no sistema.");
+        }
     }
 
     public Nota editarNota(Nota nota ) throws NotaException {
         Optional<Nota> seNotaExiste= mostrarNotaEspecificaPeloId(nota.getId());
-        if(seNotaExiste.isPresent()){
         notaRepository.save(nota);
             return nota;
-        }else{
-            throw new NotaException("não existe esta nota no sistema.");
-        }
+
     }
 
     public void deletarNota(Long id) throws NotaException {
        if(mostrarNotaEspecificaPeloId(id).isPresent()){
            notaRepository.deleteById(id);
        }
-       else {
-           throw new NotaException("não existe nota com esse id para poder ser deletada.");
-       }
+
     }
 
     public Optional<Nota> mostrarNotaEspecificaPeloId(Long id) throws NotaException {
@@ -53,14 +53,14 @@ public class NotaService {
         if(nota.isPresent()) {
             return nota;
         }else{
-            throw new NotaException("não existe nota com esse id.");
+            throw new NotaException("não existe esta nota no sistema.");
         }
     }
 
     public List<Nota> exibirNotasPelaTag(String tag ) throws NotaException {
         List<Nota> notas = notaRepository.findAllByTag(tag);
         if(!notas.isEmpty()) {
-            return notaRepository.findAllByTag(tag);
+            return notas;
         }else{
             throw new NotaException("não tem notas com essa tag.");
         }

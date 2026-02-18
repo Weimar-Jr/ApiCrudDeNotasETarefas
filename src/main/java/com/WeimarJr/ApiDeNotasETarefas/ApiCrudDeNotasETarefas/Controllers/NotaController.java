@@ -56,7 +56,7 @@ public class NotaController {
     }
 
     @DeleteMapping("/deletar-tarefa-da-nota/{idNota}/{idTarefa}")
-    public  List<Tarefa> deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws NotaException, TarefaException {
-         return atribuicaoEDesaTribuicaoTarefaNotaService.deletarTarefaDeNota(idNota, idTarefa);
+    public  void deletarTarefaDeNota(@PathVariable("idNota") Long idNota, @PathVariable("idTarefa") Long idTarefa) throws NotaException, TarefaException {
+        atribuicaoEDesaTribuicaoTarefaNotaService.deletarTarefaDeNota(idNota, idTarefa);
     }
 }

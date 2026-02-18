@@ -2,6 +2,7 @@ package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
@@ -11,6 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,11 +29,14 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
     @Mock
     private NotaRepository notaRepository;
 
-    Nota nota1 = new Nota();
-    Tarefa tarefa1 = new Tarefa();
+    Nota nota1;
+    Tarefa tarefa1;
     @BeforeEach
     void inicio()
     {
+            nota1 = new Nota();
+            tarefa1 = new Tarefa();
+
         nota1.setId(1L);
         nota1.setTituloNota("nota teste");
         nota1.setNota("usuario teste");
@@ -43,42 +50,76 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
     }
 
     @Test
-    void deveAtribuirTarefaANotaExcecaoTarefaTest()
+    void deveDarExcecaoAtribuirTarefaTest()
     {
-        when(tarefaRepository.findById(1L)).thenReturn(java.util.Optional.empty());
-
-        TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
-        assertEquals("não foi achada a tarefa pelo id", ex.getMessage());
-        verify(tarefaRepository).findById(1L);
+       when(tarefaRepository.findById(1L)).thenReturn(Optional.empty());
+       TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,1L));
+       assertEquals("não foi achada a tarefa pelo id", ex.getMessage());
+       verify(tarefaRepository, times(1)).findById(1L);
+       verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
-    void deveAtribuirTarefaANotaExcecaoNotaTest()
+    void deveDarExcecaoAtribuirNotaTest()
     {
-        when(tarefaRepository.findById(1L)).thenReturn(java.util.Optional.of(tarefa1));
-        when(notaRepository.findById(2L)).thenReturn(java.util.Optional.empty());
-
-        TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,2L));
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
+        when(notaRepository.findById(1L)).thenReturn(Optional.empty());
+        NotaException ex = assertThrows(NotaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,1L));
         assertEquals("não foi achada a nota pelo id", ex.getMessage());
-        verify(tarefaRepository).findById(1L);
-        verify(notaRepository).findById(2L);
+        verify(tarefaRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(notaRepository);
     }
 
     @Test
-    void deveAtribuirTarefaANotaTest()
-    {
-        when(tarefaRepository.findById(1L)).thenReturn(java.util.Optional.of(tarefa1));
-        when(notaRepository.findById(1L)).thenReturn(java.util.Optional.of(nota1));
-        when(notaRepository.listarTarefasDaNota(1L)).thenReturn(java.util.List.of(tarefa1));
+    void deveAtribuirTarefaANotaTest() {
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
+        when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
+        when(notaRepository.listarTarefasDaNota(1L)).thenReturn(List.of(tarefa1));
 
-        atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,1L);
-
-        assertEquals(1, notaRepository.listarTarefasDaNota(1L).size());
-        assertEquals(tarefa1, notaRepository.listarTarefasDaNota(1L).getFirst());
+        List<Tarefa> tarefasDaNota = atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L, 1L);
+        assertEquals(1, tarefasDaNota.size());
+        assertEquals(tarefa1, tarefasDaNota.get(0));
         verify(tarefaRepository, times(1)).findById(1L);
         verify(notaRepository, times(1)).findById(1L);
-        verify(notaRepository, times(3)).listarTarefasDaNota(1L);
+        verify(notaRepository, times(1)).listarTarefasDaNota(1L);
+        verifyNoMoreInteractions(tarefaRepository);
 
+    }
+
+    @Test
+    void deveDarExcecaoDesatribuicaoTarefaTest()
+    {
+        when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.empty());
+        TarefaException ex = assertThrows(TarefaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.deletarTarefaDeNota(1L,1L));
+        assertEquals("não existe tarefa com esse id", ex.getMessage());
+        verify(notaRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(tarefaRepository);
+    }
+
+    @Test
+    void deveDarExcecaoDesatribuicaoNotaTest()
+    {
+        when(notaRepository.findById(1L)).thenReturn(Optional.empty());
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
+        NotaException ex = assertThrows(NotaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.deletarTarefaDeNota(1L,1L));
+        assertEquals("não existe nota com esse id", ex.getMessage());
+        verify(notaRepository, times(1)).findById(1L);
+        verify(tarefaRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(notaRepository);
+    }
+
+    @Test
+    void deveDesatribuicaoTarefaDeNotaTest()
+    {
+        when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
+
+        atribuicaoEDesatribuicaoTarefaNotaService.deletarTarefaDeNota(1L,1L);
+
+        verify(notaRepository, times(1)).findById(1L);
+        verify(tarefaRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(notaRepository);
     }
 
 }

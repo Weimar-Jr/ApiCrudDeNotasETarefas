@@ -27,20 +27,20 @@ class NotaServiceTest {
     @Mock
     NotaRepository notaRepository;
 
-    private Nota nota1;
-    private Nota nota2;
-
+   private Nota nota1;
+   private Nota nota2;
 
     @BeforeEach
     void objetosParaTeste()
     {
         nota1 = new Nota();
+        nota2 = new Nota();
+
         nota1.setId(12L);
         nota1.setTituloNota("primeria nota para teste");
         nota1.setNota("essa é a primeira vez que eu faço um teste unitario");
         nota1.setTag("teste");
 
-        nota2 = new Nota();
         nota2.setId(22L);
         nota2.setTituloNota("segunda nota para teste");
         nota2.setNota("espero aprender bem");
@@ -48,19 +48,12 @@ class NotaServiceTest {
     }
 
     @Test
-    void deveRetornarNenhumaNota() {
+    void deveDarExecaoRetornarNenhumaNota() {
         when(notaRepository.findAll()).thenReturn(Collections.emptyList());
-        List<Nota> notas = notaService.listarNotas();
-        assertTrue(notas.isEmpty(), " a lista deve estar vazia.");
+        NotaException excecao = assertThrows(NotaException.class, () -> notaService.listarNotas());
+        assertEquals("não tem notas cadastradas no sistema.", excecao.getMessage());
         verify(notaRepository, times(1)).findAll();
-    }
-
-    @Test
-    void deveSalvarAsNotas() {
-        when(notaRepository.save(any(Nota.class))).thenReturn(nota1);
-        notaService.criarNota(nota1);
-        verify(notaRepository, times(1)).save(nota1);
-        System.out.println("foi salvo o objeto: " );
+        verifyNoMoreInteractions(notaRepository);
     }
 
     @Test
@@ -69,21 +62,47 @@ class NotaServiceTest {
         List<Nota> listaEsperada = new ArrayList<>();
         listaEsperada.add(nota1);
         listaEsperada.add(nota2);
-        
+
         when(notaRepository.findAll()).thenReturn(listaEsperada);
-
-        notaService.criarNota(nota1);
-        notaService.criarNota(nota2);
-
         List<Nota> listaResultado = notaService.listarNotas();
 
         assertEquals(listaEsperada, listaResultado);
-        verify(notaRepository, times(1)).save(nota1);
-        verify(notaRepository, times(1)).save(nota2);
         verify(notaRepository, times(1)).findAll();
+        verifyNoMoreInteractions(notaRepository);
 
     }
 
+    @Test
+    void deveSalvarAsNotas() {
+        when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Nota notaRetornada = notaService.criarNota(nota1);
+        ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
+        verify(notaRepository, times(1)).save(captor.capture());
+        Nota salvo = captor.getValue();
+        assertEquals(nota1.getTituloNota(), salvo.getTituloNota());
+        assertEquals(nota1.getNota(), salvo.getNota());
+        assertEquals(nota1.getTag(), salvo.getTag());
+        assertEquals(nota1, notaRetornada);
+
+        verifyNoMoreInteractions(notaRepository);
+
+    }
+
+    @Test
+    void deveDarErroEmEditarNota()
+    {
+        Nota notaNova = new Nota();
+        notaNova.setId(123L);
+        when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
+        NotaException excecao = assertThrows(NotaException.class, () -> notaService.editarNota(notaNova));
+        assertEquals("não existe esta nota no sistema.", excecao.getMessage());
+
+        verify(notaRepository, never()).save(any(Nota.class));
+        verify(notaRepository, times(1)).findById(notaNova.getId());
+        verifyNoMoreInteractions(notaRepository);
+
+    }
 
     @Test
     void deveEditarNota() {
@@ -105,36 +124,13 @@ class NotaServiceTest {
         ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
         verify(notaRepository, times(1)).findById(id);
         verify(notaRepository, times(1)).save(captor.capture());
-        Nota salvo = captor.getValue(); assertEquals(id, salvo.getId()); assertEquals("nota editada", salvo.getTituloNota());
+        Nota salvo = captor.getValue(); assertEquals(id, salvo.getId());
+        assertEquals("nota editada", salvo.getTituloNota());
         assertEquals("conteudo", salvo.getNota());
-        assertEquals("nota editada", resultado.getTituloNota()); verifyNoMoreInteractions(notaRepository);
+        assertEquals("nota editada", resultado.getTituloNota());
+        verifyNoMoreInteractions(notaRepository);
 
 
-
-    }
-
-    @Test
-    void deveDarErroEmEditarNota()
-    {
-        Nota notaNova = new Nota();
-        notaNova.setId(123L);
-        when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
-
-        NotaException excecao = assertThrows(NotaException.class, () -> notaService.editarNota(notaNova));
-
-        assertEquals("não existe nota com esse id.", excecao.getMessage());
-
-        verify(notaRepository, never()).save(any(Nota.class));
-        verify(notaRepository, times(1)).findById(notaNova.getId());
-
-    }
-
-    @Test
-    void deveApagarANota()
-    {
-        when(notaRepository.findById(nota1.getId())).thenReturn(Optional.of(nota1));
-        notaService.deletarNota(nota1.getId());
-        verify(notaRepository, times(1)).deleteById(nota1.getId());
 
     }
 
@@ -148,32 +144,21 @@ class NotaServiceTest {
 
         NotaException execao = assertThrows(NotaException.class, () -> notaService.deletarNota(notaNova.getId()));
 
-        assertEquals("não existe nota com esse id.", execao.getMessage());
-        verify(notaRepository, times(0)).deleteById(notaNova.getId());
+        assertEquals("não existe esta nota no sistema.", execao.getMessage());
         verify(notaRepository, times(1)).findById(notaNova.getId());
+        verify(notaRepository, times(0)).deleteById(notaNova.getId());
+        verifyNoMoreInteractions(notaRepository);
 
     }
 
     @Test
-    void deveAcharNotasPelaTag()
+    void deveDeletarANota()
     {
-        String tagTeste = "teste";
-        Nota novaNota = new Nota();
-        novaNota.setTag(" outra tag");
-        notaService.criarNota(novaNota);
-        notaService.criarNota(nota2);
-        notaService.criarNota(nota1);
-        List<Nota> listaEsperada = new ArrayList<>();
-        listaEsperada.add(nota1);
-        listaEsperada.add(nota2);
-
-        when(notaRepository.findAllByTag(tagTeste)).thenReturn(listaEsperada);
-
-        List<Nota> listaResultado = notaService.exibirNotasPelaTag(tagTeste);
-        assertEquals(listaEsperada, listaResultado);
-
-        verify(notaRepository, times(3)).save(any(Nota.class));
-        verify(notaRepository, times(2)).findAllByTag(tagTeste);
+        when(notaRepository.findById(nota1.getId())).thenReturn(Optional.of(nota1));
+        notaService.deletarNota(nota1.getId());
+        verify(notaRepository, times(1)).findById(nota1.getId());
+        verify(notaRepository, times(1)).deleteById(nota1.getId());
+        verifyNoMoreInteractions(notaRepository);
 
     }
 
@@ -182,10 +167,30 @@ class NotaServiceTest {
     {
         String tagTeste = "teste";
         when(notaRepository.findAllByTag(tagTeste)).thenReturn(Collections.emptyList());
-        assertThrows(NotaException.class, () -> notaService.exibirNotasPelaTag(tagTeste));
+        NotaException execao = assertThrows(NotaException.class, () -> notaService.exibirNotasPelaTag(tagTeste));
+        assertEquals("não tem notas com essa tag.", execao.getMessage());
 
         verify(notaRepository, times(1)).findAllByTag(tagTeste);
+        verifyNoMoreInteractions(notaRepository);
     }
+
+    @Test
+    void deveAcharNotasPelaTag()
+    {
+        String tagTeste = "teste";
+        List<Nota> listaEsperada = new ArrayList<>();
+        listaEsperada.add(nota1);
+        listaEsperada.add(nota2);
+        when(notaRepository.findAllByTag(tagTeste)).thenReturn(listaEsperada);
+
+        List<Nota> listaResultado = notaService.exibirNotasPelaTag(tagTeste);
+        assertEquals(listaEsperada, listaResultado);
+
+        verify(notaRepository, times(1)).findAllByTag(tagTeste);
+        verifyNoMoreInteractions(notaRepository);
+
+    }
+
 
 
 }
