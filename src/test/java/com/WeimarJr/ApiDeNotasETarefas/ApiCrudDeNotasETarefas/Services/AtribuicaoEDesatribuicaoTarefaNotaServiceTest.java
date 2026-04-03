@@ -9,6 +9,8 @@ import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaR
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -67,22 +69,46 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
         NotaException ex = assertThrows(NotaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,1L));
         assertEquals("não foi achada a nota pelo id", ex.getMessage());
         verify(tarefaRepository, times(1)).findById(1L);
+        verify(notaRepository, times(1)).findById(1L);
         verifyNoMoreInteractions(notaRepository);
     }
+
+    @Test
+    void deveDarExcecaoTarefaJaAtribuidaTest()
+    {
+        nota1.adicionarTarefa(tarefa1);
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
+        when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
+        NotaException ex = assertThrows(NotaException.class, () -> atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L,1L));
+        assertEquals("tarefa já atribuida a nota", ex.getMessage());
+        verify(tarefaRepository, times(1)).findById(1L);
+        verify(notaRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(tarefaRepository);
+    }
+
 
     @Test
     void deveAtribuirTarefaANotaTest() {
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
         when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
-        when(notaRepository.listarTarefasDaNota(1L)).thenReturn(List.of(tarefa1));
+        when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        List<Tarefa> tarefasDaNota = atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L, 1L);
-        assertEquals(1, tarefasDaNota.size());
-        assertEquals(tarefa1, tarefasDaNota.get(0));
+        atribuicaoEDesatribuicaoTarefaNotaService.atribuirTarefaANota(1L, 1L);
+        ArgumentCaptor<Tarefa> captorTarefa = ArgumentCaptor.forClass(Tarefa.class);
+        ArgumentCaptor<Nota> captorNota = ArgumentCaptor.forClass(Nota.class);
+        verify(tarefaRepository, times(1)).save(captorTarefa.capture());
+        verify(notaRepository, times(1)).save(captorNota.capture());
+        Nota notaSalva = captorNota.getValue();
+        Tarefa tarefaSalva = captorTarefa.getValue();
+
+
+        assertEquals(tarefaSalva.getNota(), notaSalva);
+        assertEquals(notaSalva.getTarefasRelacionadas().get(0), tarefaSalva);
         verify(tarefaRepository, times(1)).findById(1L);
         verify(notaRepository, times(1)).findById(1L);
-        verify(notaRepository, times(1)).listarTarefasDaNota(1L);
-        verifyNoMoreInteractions(tarefaRepository);
+
+
 
     }
 
