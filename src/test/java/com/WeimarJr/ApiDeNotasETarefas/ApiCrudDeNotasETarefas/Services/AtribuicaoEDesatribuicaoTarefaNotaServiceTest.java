@@ -140,11 +140,22 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
     {
         when(notaRepository.findById(1L)).thenReturn(Optional.of(nota1));
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa1));
-
+        when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
         atribuicaoEDesatribuicaoTarefaNotaService.deletarTarefaDeNota(1L,1L);
 
+         ArgumentCaptor<Tarefa> captorTarefa = ArgumentCaptor.forClass(Tarefa.class);
+        ArgumentCaptor<Nota> captorNota = ArgumentCaptor.forClass(Nota.class);
+        verify(tarefaRepository, times(1)).save(captorTarefa.capture());
+        verify(notaRepository, times(1)).save(captorNota.capture());
+        Nota notaSalva = captorNota.getValue();
+        Tarefa tarefaSalva = captorTarefa.getValue();
+        assertEquals(tarefaSalva.getNota(), null);
+        assert(!notaSalva.getTarefasRelacionadas().contains(tarefaSalva));
         verify(notaRepository, times(1)).findById(1L);
         verify(tarefaRepository, times(1)).findById(1L);
+        verify(tarefaRepository, times(1)).save(any(Tarefa.class));
+        verify(notaRepository, times(1)).save(any(Nota.class));
         verifyNoMoreInteractions(notaRepository);
     }
 

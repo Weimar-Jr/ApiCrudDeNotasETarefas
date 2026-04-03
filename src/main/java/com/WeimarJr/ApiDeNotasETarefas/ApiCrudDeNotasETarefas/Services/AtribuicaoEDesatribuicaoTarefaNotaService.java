@@ -49,6 +49,8 @@ public class AtribuicaoEDesatribuicaoTarefaNotaService {
         if (nota.isPresent()) {
             if (tarefa.isPresent()) {
                 nota.get().removerTarefa(tarefa.get());
+                tarefa.get().setNota(null);
+                tarefaRepository.save(tarefa.get());
                 notaRepository.save(nota.get());
             } else {
                 throw new TarefaException("não existe tarefa com esse id");
