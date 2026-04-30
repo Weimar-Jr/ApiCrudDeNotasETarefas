@@ -14,4 +14,5 @@ public record CriarNotaRequestDTO(
         @NotBlank(message = "A tag da nota é obrigatória.")
         String tag,
         @Valid List<TarefaDTO> tarefasRelacionadas) {
+
 }

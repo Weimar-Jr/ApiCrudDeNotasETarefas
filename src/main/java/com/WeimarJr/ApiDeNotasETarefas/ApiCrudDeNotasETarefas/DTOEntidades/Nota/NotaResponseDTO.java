@@ -6,15 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record NotaResponseDTO(
-        @JsonProperty("id da nota")
+        @JsonProperty("id_da_nota")
         Long id,
-        @JsonProperty("titulo da nota")
+        @JsonProperty("titulo_da_nota")
         String tituloNota,
-        @JsonProperty("texto da nota")
+        @JsonProperty("texto_da_nota")
         String nota,
-        @JsonProperty("tag da nota")
+        @JsonProperty("tag_da_nota")
         String tag,
-        @JsonProperty("tarefas relacionadas")
+        @JsonProperty("tarefas_relacionadas")
         List<TarefaDTO> tarefasRelacionadas
 ) {
 }

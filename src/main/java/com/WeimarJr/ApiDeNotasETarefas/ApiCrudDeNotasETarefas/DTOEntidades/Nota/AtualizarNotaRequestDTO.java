@@ -5,9 +5,10 @@ import java.util.List;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.TarefaDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record AtualizarNotaRequestDTO(
-        @NotBlank(message = "O ID da nota é obrigatório.")
+        @NotNull(message = "O ID da nota é obrigatório.")
         Long id,
         @NotBlank(message = "O título da nota é obrigatório.")
         String tituloNota,
