@@ -104,10 +104,10 @@ class NotaServiceTest {
         NotaResponseDTO notaRetornada = notaService.criarNota(criarNotaRequestDTO1);
         ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
         verify(notaRepository, times(1)).save(captor.capture());
-        NotaResponseDTO salvo = notaMapper.toNotaResponseDTO(captor.getValue());
-        assertEquals(criarNotaRequestDTO1.tituloNota(), salvo.tituloNota());
-        assertEquals(criarNotaRequestDTO1.textoNota(), salvo.textoNota());
-        assertEquals(criarNotaRequestDTO1.tag(), salvo.tag());
+        Nota salvo = captor.getValue();
+        assertEquals(criarNotaRequestDTO1.tituloNota(), salvo.getTituloNota());
+        assertEquals(criarNotaRequestDTO1.textoNota(), salvo.getTextoNota());
+        assertEquals(criarNotaRequestDTO1.tag(), salvo.getTag());
         assertEquals(notaResponseDTO1, notaRetornada);
 
         verifyNoMoreInteractions(notaRepository);
@@ -141,14 +141,12 @@ class NotaServiceTest {
         ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
         verify(notaRepository, times(1)).findById(notaEditada.id());
         verify(notaRepository, times(1)).save(captor.capture());
-        NotaResponseDTO salvo = notaMapper.toNotaResponseDTO(captor.getValue());
-        assertEquals(notaEditada.id(), salvo.id());
-        assertEquals("nota editada", salvo.tituloNota());
-        assertEquals("conteudo", salvo.textoNota());
-        assertEquals("nota editada", resultado.tituloNota());
+        Nota salvo = captor.getValue();
+        assertEquals(resultado.id(), salvo.getId());
+        assertEquals(resultado.tituloNota(), salvo.getTituloNota());
+        assertEquals(resultado.textoNota(), salvo.getTextoNota());
+        assertEquals(resultado.tag(), salvo.getTag());
         verifyNoMoreInteractions(notaRepository);
-
-
 
     }
 
