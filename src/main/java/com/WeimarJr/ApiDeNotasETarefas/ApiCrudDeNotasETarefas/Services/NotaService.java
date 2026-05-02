@@ -45,7 +45,7 @@ public class NotaService {
     @Transactional
     public NotaResponseDTO editarNota(AtualizarNotaRequestDTO nota) throws NotaException {
         Nota notaAtualizada = notaMapper.toNota(nota);
-        existeNotaPeloId(notaAtualizada.getId());
+        mostrarNotaEspecificaPeloId(notaAtualizada.getId());
         notaRepository.save(notaAtualizada);
         return notaMapper.toNotaResponseDTO(notaAtualizada);
     }

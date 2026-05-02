@@ -35,6 +35,7 @@ class NotaServiceTest {
 
    private Nota nota1;
    private Nota nota2;
+   private Nota notaEditada;
    private NotaResponseDTO notaResponseDTO1;
    private NotaResponseDTO notaResponseDTO2;
    private CriarNotaRequestDTO criarNotaRequestDTO1;
@@ -46,6 +47,8 @@ class NotaServiceTest {
     {
         nota1 = new Nota();
         nota2 = new Nota();
+        notaEditada = new Nota();
+
 
         nota1.setId(12L);
         nota1.setTituloNota("primeria nota para teste");
@@ -56,6 +59,11 @@ class NotaServiceTest {
         nota2.setTituloNota("segunda nota para teste");
         nota2.setTextoNota("espero aprender bem");
         nota2.setTag("teste");
+
+        notaEditada.setId(12L);
+        notaEditada.setTituloNota("nota editada");
+        notaEditada.setTextoNota("conteudo");
+        notaEditada.setTag("teste");
 
         notaResponseDTO1 = new NotaResponseDTO(12L, "primeria nota para teste", "essa é a primeira vez que eu faço um teste unitario", "teste", new ArrayList<>());
         notaResponseDTO2 = new NotaResponseDTO(22L, "segunda nota para teste", "espero aprender bem", "teste", new ArrayList<>());
@@ -100,7 +108,6 @@ class NotaServiceTest {
         when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(notaMapper.toNota(criarNotaRequestDTO1)).thenReturn(nota1);
         when(notaMapper.toNotaResponseDTO(nota1)).thenReturn(notaResponseDTO1);
-        when(notaMapper.toNotaResponseDTO(any(Nota.class))).thenReturn(notaResponseDTO1);
         NotaResponseDTO notaRetornada = notaService.criarNota(criarNotaRequestDTO1);
         ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
         verify(notaRepository, times(1)).save(captor.capture());
@@ -119,11 +126,12 @@ class NotaServiceTest {
     {
 
         when(notaRepository.findById(atualizarNotaRequestDTO1.id())).thenReturn(Optional.empty());
+        when(notaMapper.toNota(any(AtualizarNotaRequestDTO.class))).thenReturn(nota1);
         NotaException excecao = assertThrows(NotaException.class, () -> notaService.editarNota(atualizarNotaRequestDTO1));
         assertEquals("não existe esta nota no sistema.", excecao.getMessage());
 
         verify(notaRepository, never()).save(any(Nota.class));
-        verify(notaRepository, times(1)).findById(atualizarNotaRequestDTO1.id());
+        verify(notaRepository, times(1)).findById(nota1.getId());
         verifyNoMoreInteractions(notaRepository);
 
     }
@@ -131,15 +139,15 @@ class NotaServiceTest {
     @Test
     void deveEditarNota() {
 
-        AtualizarNotaRequestDTO notaEditada = new AtualizarNotaRequestDTO(12L, "nota editada", "conteudo", "teste", new ArrayList<>());
+        AtualizarNotaRequestDTO notaAtualizada = new AtualizarNotaRequestDTO(12L, "nota editada", "conteudo", "teste", new ArrayList<>());
 
-        when(notaRepository.findById(atualizarNotaRequestDTO1.id())).thenReturn(Optional.of(nota1));
+        when(notaRepository.findById(atualizarNotaRequestDTO1.id())).thenReturn(Optional.of(notaEditada));
         when(notaRepository.save(any(Nota.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(notaMapper.toNota(any(AtualizarNotaRequestDTO.class))).thenReturn(nota1);
+        when(notaMapper.toNota(any(AtualizarNotaRequestDTO.class))).thenReturn(notaEditada);
         when(notaMapper.toNotaResponseDTO(any(Nota.class))).thenReturn(new NotaResponseDTO(12L, "nota editada", "conteudo", "teste", new ArrayList<>()));
-        NotaResponseDTO resultado = notaService.editarNota(notaEditada);
+        NotaResponseDTO resultado = notaService.editarNota(notaAtualizada);
         ArgumentCaptor<Nota> captor = ArgumentCaptor.forClass(Nota.class);
-        verify(notaRepository, times(1)).findById(notaEditada.id());
+        verify(notaRepository, times(1)).findById(notaAtualizada.id());
         verify(notaRepository, times(1)).save(captor.capture());
         Nota salvo = captor.getValue();
         assertEquals(resultado.id(), salvo.getId());
@@ -156,12 +164,11 @@ class NotaServiceTest {
         Nota notaNova = new Nota();
         notaNova.setId(123L);
 
-        when(notaRepository.findById(notaNova.getId())).thenReturn(Optional.empty());
+        when(notaRepository.existsById(notaNova.getId())).thenReturn(false);
 
         NotaException execao = assertThrows(NotaException.class, () -> notaService.deletarNota(notaNova.getId()));
 
         assertEquals("não existe esta nota no sistema.", execao.getMessage());
-        verify(notaRepository, times(1)).findById(notaNova.getId());
         verify(notaRepository, times(0)).deleteById(notaNova.getId());
         verifyNoMoreInteractions(notaRepository);
 
@@ -170,9 +177,9 @@ class NotaServiceTest {
     @Test
     void deveDeletarANota()
     {
-        when(notaRepository.findById(nota1.getId())).thenReturn(Optional.of(nota1));
+        when(notaRepository.existsById(nota1.getId())).thenReturn(true);
+
         notaService.deletarNota(nota1.getId());
-        verify(notaRepository, times(1)).findById(nota1.getId());
         verify(notaRepository, times(1)).deleteById(nota1.getId());
         verifyNoMoreInteractions(notaRepository);
 
