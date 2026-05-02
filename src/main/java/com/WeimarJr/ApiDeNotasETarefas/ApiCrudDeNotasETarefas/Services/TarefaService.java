@@ -70,7 +70,7 @@ public class TarefaService {
 
     public TarefaResponseDTO editarTarefa(AtualizarTarefaRequestDTO tarefa) throws TarefaException {
         Tarefa tarefaAtualizada = tarefaMapper.toTarefa(tarefa);
-        existeTarefaPeloId(tarefaAtualizada.getId());
+        acharPeloId(tarefaAtualizada.getId());
         tarefaRepository.save(tarefaAtualizada);
         return tarefaMapper.toTarefaResponseDTO(tarefaAtualizada);
 

@@ -34,6 +34,7 @@ public class TarefaServiceTest {
 
     Tarefa tarefa1;
     Tarefa tarefa2;
+    Tarefa tarefaEditada;
     AtualizarTarefaRequestDTO atualizarTarefaRequestDTO1;
     CriarTarefaRequestDTO criarTarefaRequestDTO1;
     TarefaResponseDTO tarefaResponseDTO1;
@@ -44,6 +45,9 @@ public class TarefaServiceTest {
     @BeforeEach
     void tarefaParaTestes()
     {
+            tarefaEditada = new Tarefa(20L, "teste editado", "descrição editada", 2, true, null);
+
+
             tarefa1 = new Tarefa();
             tarefa2 = new Tarefa();
             tarefa1.setId(123L);
@@ -133,12 +137,13 @@ public class TarefaServiceTest {
     @Test
     void deveEditarTarefaExecaoTest()
     {
-        AtualizarTarefaRequestDTO tarefaEditada = new AtualizarTarefaRequestDTO(20L, "teste editado", "descrição editada", 2, true, null);
+        AtualizarTarefaRequestDTO tarefaAtualizada = new AtualizarTarefaRequestDTO(20L, "teste editado", "descrição editada", 2, true, null);
 
-        when(tarefaRepository.findById(tarefaEditada.id())).thenReturn(Optional.empty());
-        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.editarTarefa(tarefaEditada));
+        when(tarefaRepository.findById(tarefaEditada.getId())).thenReturn(Optional.empty());
+        when(tarefaMapper.toTarefa(any(AtualizarTarefaRequestDTO.class))).thenReturn(tarefaEditada);
+        TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.editarTarefa(tarefaAtualizada));
         assertEquals("tarefa não existe.", ex.getMessage());
-        verify(tarefaRepository, times(1)).findById(tarefaEditada.id());
+        verify(tarefaRepository, times(1)).findById(tarefaAtualizada.id());
         verifyNoMoreInteractions(tarefaRepository);
     }
 
