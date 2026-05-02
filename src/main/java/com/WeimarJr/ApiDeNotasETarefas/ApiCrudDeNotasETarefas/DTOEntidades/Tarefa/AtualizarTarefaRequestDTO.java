@@ -8,7 +8,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record AtualizarTarefaRequestDTO(
-        @NotNull(message = "O título da tarefa é obrigatório")
+        @NotNull(message = "O id da tarefa é obrigatório")
+        Long id,
+        @NotBlank(message = "O título da tarefa é obrigatório")
         String tituloTarefa,
         @NotBlank(message = "A descrição da tarefa é obrigatória")
         String descricaoTarefa,

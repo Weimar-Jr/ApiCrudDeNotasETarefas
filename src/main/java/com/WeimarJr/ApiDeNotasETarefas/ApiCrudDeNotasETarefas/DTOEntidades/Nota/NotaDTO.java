@@ -13,7 +13,7 @@ public record NotaDTO(
             String tituloNota,
         @NotBlank(message = "O texto da nota é obrigatório.")
         @JsonProperty("texto_da_nota")
-            String nota,
+            String textoNota,
         @NotBlank(message = "A tag da nota é obrigatória.")
         @JsonProperty("tag_da_nota")
             String tag

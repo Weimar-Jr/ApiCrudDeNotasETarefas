@@ -1,12 +1,15 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Mapper.TarefaMapper;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.AtualizarTarefaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.CriarTarefaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.TarefaResponseDTO;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
@@ -25,10 +28,18 @@ public class TarefaServiceTest {
     private TarefaService tarefaService;
     @Mock
     private TarefaRepository tarefaRepository;
+    @Mock
+    private TarefaMapper tarefaMapper;
 
 
     Tarefa tarefa1;
     Tarefa tarefa2;
+    AtualizarTarefaRequestDTO atualizarTarefaRequestDTO1;
+    CriarTarefaRequestDTO criarTarefaRequestDTO1;
+    TarefaResponseDTO tarefaResponseDTO1;
+    TarefaResponseDTO tarefaResponseDTO2;
+    TarefaResponseDTO tarefaResponseDTOEditada;
+
 
     @BeforeEach
     void tarefaParaTestes()
@@ -47,6 +58,11 @@ public class TarefaServiceTest {
             tarefa2.setPrioridade(1);
             tarefa2.setConcluida(true);
 
+            criarTarefaRequestDTO1 = new CriarTarefaRequestDTO("primeiro teste", "descrição", 5);
+            atualizarTarefaRequestDTO1 = new AtualizarTarefaRequestDTO(123L, "primeiro teste", "", 1, true, null );
+            tarefaResponseDTO1 = new TarefaResponseDTO(123L, "primeiro teste", "descrição", 5, false, null);
+            tarefaResponseDTO2 = new TarefaResponseDTO(456L, "segundo teste", "", 1, true, null);
+            tarefaResponseDTOEditada = new TarefaResponseDTO(123L, "teste editado", "descrição editada", 2, true, null);
 
     }
 
@@ -54,20 +70,17 @@ public class TarefaServiceTest {
     void deveSalvarTarefaTest()
     {
         when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Tarefa tarefaRetornada1 =  tarefaService.criarTarefa(tarefa1);
+        when(tarefaMapper.toTarefa(any(CriarTarefaRequestDTO.class))).thenReturn(tarefa1);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO1);
+
+        TarefaResponseDTO tarefaRetornada1 =  tarefaService.criarTarefa(criarTarefaRequestDTO1);
         ArgumentCaptor<Tarefa> captor = ArgumentCaptor.forClass(Tarefa.class);
         verify(tarefaRepository, times(1)).save(captor.capture());
         Tarefa salvo = captor.getValue();
-        assertEquals(tarefa1.getId(), salvo.getId());
-        assertEquals(tarefa1.getNomeTarefa(), salvo.getNomeTarefa());
-        assertEquals(tarefa1.getDescricaoTarefa(), salvo.getDescricaoTarefa());
-        assertEquals(tarefa1.getPrioridade(), salvo.getPrioridade());
-        assertEquals(tarefa1.getConcluida(), salvo.getConcluida());
-        assertEquals(tarefa1.getId(), tarefaRetornada1.getId());
-        assertEquals(tarefa1.getNomeTarefa(), tarefaRetornada1.getNomeTarefa());
-        assertEquals(tarefa1.getDescricaoTarefa(), tarefaRetornada1.getDescricaoTarefa());
-        assertEquals(tarefa1.getPrioridade(), tarefaRetornada1.getPrioridade());
-        assertEquals(tarefa1.getConcluida(), tarefaRetornada1.getConcluida());
+        assertEquals(criarTarefaRequestDTO1.tituloTarefa(), salvo.getNomeTarefa());
+        assertEquals(criarTarefaRequestDTO1.descricaoTarefa(), salvo.getDescricaoTarefa());
+        assertEquals(criarTarefaRequestDTO1.prioridade(), salvo.getPrioridade());
+        assertEquals(tarefaResponseDTO1, tarefaRetornada1);
         verifyNoMoreInteractions(tarefaRepository);
     }
 
@@ -84,9 +97,11 @@ public class TarefaServiceTest {
     @Test
     void deveListaTarefasTest()
     {
-        List<Tarefa> listaEsperada = List.of(tarefa1,tarefa2);
-        when(tarefaRepository.findAll(any(Sort.class))).thenReturn(listaEsperada);
-        List<Tarefa> listaRetornada = tarefaService.listarTarefas();
+        List<Tarefa> listaEsperadaEntidades = List.of(tarefa1,tarefa2);
+        List<TarefaResponseDTO> listaEsperada = List.of(tarefaResponseDTO1, tarefaResponseDTO2);
+        when(tarefaRepository.findAll(any(Sort.class))).thenReturn(listaEsperadaEntidades);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO1).thenReturn(tarefaResponseDTO2);
+        List<TarefaResponseDTO> listaRetornada = tarefaService.listarTarefas();
         assertEquals(listaEsperada, listaRetornada);
         verify(tarefaRepository, times(1)).findAll(any(Sort.class));
         verifyNoMoreInteractions(tarefaRepository);
@@ -105,10 +120,11 @@ public class TarefaServiceTest {
     @Test
     void deveAcharTarefaPeloIdTest()
     {
-        Tarefa tarefaEsperada = tarefa1;
+        TarefaResponseDTO tarefaEsperada = tarefaResponseDTO1;
         when(tarefaRepository.findById(tarefa1.getId())).thenReturn(Optional.of(tarefa1));
-        Optional<Tarefa> tarefaRetornada = tarefaService.acharPeloId(tarefa1.getId());
-        assertEquals(tarefaEsperada, tarefaRetornada.get());
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO1);
+        TarefaResponseDTO tarefaRetornada = tarefaService.acharPeloId(tarefa1.getId());
+        assertEquals(tarefaEsperada, tarefaRetornada);
         verify(tarefaRepository, times(1)).findById(tarefa1.getId());
         verifyNoMoreInteractions(tarefaRepository);
 
@@ -117,49 +133,41 @@ public class TarefaServiceTest {
     @Test
     void deveEditarTarefaExecaoTest()
     {
-        Tarefa tarefaEditada = new Tarefa();
-        tarefaEditada.setId(55L);
-        when(tarefaRepository.findById(tarefaEditada.getId())).thenReturn(Optional.empty());
+        AtualizarTarefaRequestDTO tarefaEditada = new AtualizarTarefaRequestDTO(20L, "teste editado", "descrição editada", 2, true, null);
+
+        when(tarefaRepository.findById(tarefaEditada.id())).thenReturn(Optional.empty());
         TarefaException ex = assertThrows(TarefaException.class, () -> tarefaService.editarTarefa(tarefaEditada));
         assertEquals("tarefa não existe.", ex.getMessage());
-        verify(tarefaRepository, times(1)).findById(tarefaEditada.getId());
+        verify(tarefaRepository, times(1)).findById(tarefaEditada.id());
         verifyNoMoreInteractions(tarefaRepository);
     }
 
     @Test
     void deveEditartarefaTest()
     {
-        Long id = 22L;
-        Tarefa tarefaAntiga = new Tarefa();
-        tarefaAntiga.setId(id);
-        tarefaAntiga.setNomeTarefa("teste");
-        tarefaAntiga.setDescricaoTarefa("descrição");
-        tarefaAntiga.setPrioridade(4);
-        tarefaAntiga.setConcluida(false);
+        AtualizarTarefaRequestDTO tarefaEditada = new AtualizarTarefaRequestDTO(123L, "teste editado", "descrição editada", 2, true, null);
+        Tarefa tarefaAtualizada = new Tarefa();
+        tarefaAtualizada.setId(tarefaEditada.id());
+        tarefaAtualizada.setNomeTarefa(tarefaEditada.tituloTarefa());
+        tarefaAtualizada.setDescricaoTarefa(tarefaEditada.descricaoTarefa());
+        tarefaAtualizada.setPrioridade(tarefaEditada.prioridade());
+        tarefaAtualizada.setConcluida(tarefaEditada.concluida());
 
-        Tarefa tarefaEditada = new Tarefa();
-        tarefaEditada.setId(id);
-        tarefaEditada.setNomeTarefa("teste editado");
-        tarefaEditada.setDescricaoTarefa("descrição editada");
-        tarefaEditada.setPrioridade(2);
-        tarefaEditada.setConcluida(true);
+        when(tarefaRepository.findById(tarefaEditada.id())).thenReturn(Optional.of(tarefa1));
+        when(tarefaMapper.toTarefa(any(AtualizarTarefaRequestDTO.class))).thenReturn(tarefaAtualizada);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTOEditada);
 
-        when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefaAntiga));
-        when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Tarefa resultado = tarefaService.editarTarefa(tarefaEditada);
+        TarefaResponseDTO resultado = tarefaService.editarTarefa(tarefaEditada);
         ArgumentCaptor<Tarefa> captor = ArgumentCaptor.forClass(Tarefa.class);
-        verify(tarefaRepository, times(1)).findById(id);
+        verify(tarefaRepository, times(1)).findById(tarefaEditada.id());
         verify(tarefaRepository, times(1)).save(captor.capture());
         Tarefa salvo = captor.getValue();
-        assertEquals(id, salvo.getId());
-        assertEquals("teste editado", salvo.getNomeTarefa());
-        assertEquals("descrição editada", salvo.getDescricaoTarefa());
-        assertEquals(2, salvo.getPrioridade());
-        assertEquals(true, salvo.getConcluida());
-        assertEquals("teste editado", resultado.getNomeTarefa());
-        assertEquals("descrição editada", resultado.getDescricaoTarefa());
-        assertEquals(2, resultado.getPrioridade());
-        assertEquals(true, resultado.getConcluida());
+        assertEquals(tarefaEditada.id(), salvo.getId());
+        assertEquals(tarefaEditada.tituloTarefa(), salvo.getNomeTarefa());
+        assertEquals(tarefaEditada.descricaoTarefa(), salvo.getDescricaoTarefa());
+        assertEquals(tarefaEditada.prioridade(), salvo.getPrioridade());
+        assertEquals(tarefaEditada.concluida(), salvo.getConcluida());
+        assertEquals(tarefaResponseDTOEditada, resultado);
         verifyNoMoreInteractions(tarefaRepository);
     }
 
@@ -197,14 +205,13 @@ public class TarefaServiceTest {
     @Test
     void deveMostrarTarefasPelaPrioridadeTest()
     {
-        tarefa1.setPrioridade(3);
-        tarefa2.setPrioridade(5);
-        List<Tarefa> listaEsperada = List.of(tarefa1);
-        when(tarefaRepository.findAllByPrioridade(3)).thenReturn(listaEsperada);
-        List<Tarefa> listaRetornada = tarefaService.mostrarTarefasPelaPrioridade(3);
-        assertEquals(listaEsperada.size(), listaRetornada.size());
-        assertEquals(listaEsperada.get(0), listaRetornada.get(0));
-        verify(tarefaRepository, times(1)).findAllByPrioridade(3);
+        List<Tarefa> listaEsperadaEntidades = List.of(tarefa1);
+        List<TarefaResponseDTO> listaEsperada = List.of(tarefaResponseDTO1);
+        when(tarefaRepository.findAllByPrioridade(5)).thenReturn(listaEsperadaEntidades);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO1);
+        List<TarefaResponseDTO> listaRetornada = tarefaService.mostrarTarefasPelaPrioridade(5);
+        assertEquals(listaEsperada, listaRetornada);
+        verify(tarefaRepository, times(1)).findAllByPrioridade(5);
         verifyNoMoreInteractions(tarefaRepository);
     }
 
@@ -221,20 +228,23 @@ public class TarefaServiceTest {
 
     @Test void deveMostrarTarefasNaoConcluidas()
     {
-        tarefa1.setConcluida(false);
         List<Tarefa> listaEsperada = List.of(tarefa1);
+        List<TarefaResponseDTO> listaEsperadaDTO = List.of(tarefaResponseDTO1);
         when(tarefaRepository.findAllByConcluida(false)).thenReturn(listaEsperada);
-        List<Tarefa> resultado = tarefaService.mostrarTarefasConcluidasOuNao(false);
-        assertEquals(listaEsperada, resultado); verify(tarefaRepository, times(1)).findAllByConcluida(false);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO1);
+        List<TarefaResponseDTO> resultado = tarefaService.mostrarTarefasConcluidasOuNao(false);
+        assertEquals(listaEsperadaDTO, resultado);
+        verify(tarefaRepository, times(1)).findAllByConcluida(false);
         verifyNoMoreInteractions(tarefaRepository);
     }
     @Test void deveMostrarTarefasConcluidas()
     {
-        tarefa2.setConcluida(true);
         List<Tarefa> listaEsperada = List.of(tarefa2);
+        List<TarefaResponseDTO> listaEsperadaDTO = List.of(tarefaResponseDTO2);
         when(tarefaRepository.findAllByConcluida(true)).thenReturn(listaEsperada);
-        List<Tarefa> resultado = tarefaService.mostrarTarefasConcluidasOuNao(true);
-        assertEquals(listaEsperada, resultado);
+        when(tarefaMapper.toTarefaResponseDTO(any(Tarefa.class))).thenReturn(tarefaResponseDTO2);
+        List<TarefaResponseDTO> resultado = tarefaService.mostrarTarefasConcluidasOuNao(true);
+        assertEquals(listaEsperadaDTO, resultado);
         verify(tarefaRepository, times(1)).findAllByConcluida(true);
         verifyNoMoreInteractions(tarefaRepository);
     }

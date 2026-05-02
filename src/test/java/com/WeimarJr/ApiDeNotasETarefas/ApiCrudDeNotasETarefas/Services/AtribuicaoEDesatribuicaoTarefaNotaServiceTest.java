@@ -41,7 +41,7 @@ public class AtribuicaoEDesatribuicaoTarefaNotaServiceTest {
 
         nota1.setId(1L);
         nota1.setTituloNota("nota teste");
-        nota1.setNota("usuario teste");
+        nota1.setTextoNota("usuario teste");
 
         tarefa1.setId(1L);
         tarefa1.setNomeTarefa("tarefa teste");

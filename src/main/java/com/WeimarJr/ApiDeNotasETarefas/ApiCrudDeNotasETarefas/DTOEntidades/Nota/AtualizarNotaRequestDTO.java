@@ -6,6 +6,8 @@ import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Taref
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+
 
 public record AtualizarNotaRequestDTO(
         @NotNull(message = "O ID da nota é obrigatório.")
@@ -13,7 +15,7 @@ public record AtualizarNotaRequestDTO(
         @NotBlank(message = "O título da nota é obrigatório.")
         String tituloNota,
         @NotBlank(message = "O texto da nota é obrigatório.")
-        String nota,
+        String textoNota,
         @NotBlank(message = "A tag da nota é obrigatória.")
         String tag,
         @Valid

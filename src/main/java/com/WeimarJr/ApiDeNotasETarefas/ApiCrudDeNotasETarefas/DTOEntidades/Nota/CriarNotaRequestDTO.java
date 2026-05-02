@@ -10,7 +10,7 @@ public record CriarNotaRequestDTO(
         @NotBlank(message = "O título da nota é obrigatório.")
         String tituloNota,
         @NotBlank(message = "O texto da nota é obrigatório.")
-        String nota,
+        String textoNota,
         @NotBlank(message = "A tag da nota é obrigatória.")
         String tag,
         @Valid List<TarefaDTO> tarefasRelacionadas) {

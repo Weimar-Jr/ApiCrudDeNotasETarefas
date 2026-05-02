@@ -1,9 +1,13 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services;
 
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Mapper.NotaMapper;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.AtualizarNotaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.CriarNotaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.NotaResponseDTO;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.NotaRepository;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.repository.TarefaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,55 +16,68 @@ import java.util.Optional;
 @Service
 public class NotaService {
     private final NotaRepository notaRepository;
-    public NotaService( NotaRepository notaRepository, TarefaRepository tarefaRepository)
+    private final NotaMapper notaMapper;
+    public NotaService( NotaRepository notaRepository, NotaMapper notaMapper)
     {
         this.notaRepository = notaRepository;
+        this.notaMapper = notaMapper;
     }
 
-    public Nota criarNota( Nota nota)
+    @Transactional
+    public NotaResponseDTO criarNota( CriarNotaRequestDTO criarNotaDTO)
     {
+        Nota nota = notaMapper.toNota(criarNotaDTO);
         notaRepository.save(nota);
-        return  nota;
+        return notaMapper.toNotaResponseDTO(nota);
 
     }
 
-    public List<Nota> listarNotas()
+    public List<NotaResponseDTO> listarNotas()
     {
         List<Nota> notas = notaRepository.findAll();
         if(!notas.isEmpty()) {
-            return notas;
+            return notas.stream().map(notaMapper::toNotaResponseDTO).toList();
         }else {
             throw new NotaException("não tem notas cadastradas no sistema.");
         }
     }
 
-    public Nota editarNota(Nota nota ) throws NotaException {
-        Optional<Nota> seNotaExiste= mostrarNotaEspecificaPeloId(nota.getId());
-        notaRepository.save(nota);
-            return nota;
-
+    @Transactional
+    public NotaResponseDTO editarNota(AtualizarNotaRequestDTO nota) throws NotaException {
+        Nota notaAtualizada = notaMapper.toNota(nota);
+        existeNotaPeloId(notaAtualizada.getId());
+        notaRepository.save(notaAtualizada);
+        return notaMapper.toNotaResponseDTO(notaAtualizada);
     }
 
     public void deletarNota(Long id) throws NotaException {
-       if(mostrarNotaEspecificaPeloId(id).isPresent()){
+       if(existeNotaPeloId(id)){
            notaRepository.deleteById(id);
        }
 
     }
 
-    public Optional<Nota> mostrarNotaEspecificaPeloId(Long id) throws NotaException {
+    public Boolean existeNotaPeloId(Long id) {
+        if(!notaRepository.existsById(id)) {
+            throw new NotaException("não existe esta nota no sistema.");
+        }else {
+            return true;
+        }
+    }
+
+    public NotaResponseDTO mostrarNotaEspecificaPeloId(Long id) throws NotaException {
         Optional<Nota> nota = notaRepository.findById(id);
         if(nota.isPresent()) {
-            return nota;
+            return notaMapper.toNotaResponseDTO(nota.get());
         }else{
             throw new NotaException("não existe esta nota no sistema.");
         }
     }
 
-    public List<Nota> exibirNotasPelaTag(String tag ) throws NotaException {
+    public List<NotaResponseDTO> exibirNotasPelaTag(String tag ) throws NotaException {
         List<Nota> notas = notaRepository.findAllByTag(tag);
         if(!notas.isEmpty()) {
-            return notas;
+            return notas.stream().map(notaMapper::toNotaResponseDTO).toList();
         }else{
             throw new NotaException("não tem notas com essa tag.");
         }

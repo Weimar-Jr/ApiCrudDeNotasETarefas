@@ -21,7 +21,7 @@ public class Nota {
     @Column(nullable = false, name = "titulo_da_nota")
     @Getter @Setter private String tituloNota;
     @Column(nullable = false, name = "texto_da_nota")
-    @Getter @Setter private String nota;
+    @Getter @Setter private String textoNota;
     @Column(nullable = false, name = "tag_da_nota")
     @Getter @Setter private String tag;
 

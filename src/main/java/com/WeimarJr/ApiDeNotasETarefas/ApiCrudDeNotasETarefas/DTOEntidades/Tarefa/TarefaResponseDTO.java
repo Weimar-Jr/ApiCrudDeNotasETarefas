@@ -1,5 +1,6 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa;
 
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.NotaDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record TarefaResponseDTO(
@@ -12,6 +13,8 @@ public record TarefaResponseDTO(
         @JsonProperty("prioridade_da_tarefa")
         Integer prioridade,
         @JsonProperty("conclusão_da_tarefa")
-        Boolean concluida
+        Boolean concluida,
+        @JsonProperty("nota_relacionada")
+        NotaDTO nota
 ) {
 }

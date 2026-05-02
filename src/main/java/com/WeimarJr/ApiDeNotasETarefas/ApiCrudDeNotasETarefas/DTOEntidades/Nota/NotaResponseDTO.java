@@ -11,7 +11,7 @@ public record NotaResponseDTO(
         @JsonProperty("titulo_da_nota")
         String tituloNota,
         @JsonProperty("texto_da_nota")
-        String nota,
+        String textoNota,
         @JsonProperty("tag_da_nota")
         String tag,
         @JsonProperty("tarefas_relacionadas")
