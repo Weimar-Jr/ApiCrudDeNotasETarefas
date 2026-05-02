@@ -53,7 +53,7 @@ public class TarefaController {
         tarefaService.deletarTarefa(id);
     }
     @PutMapping("/atribuir-tarefa-a-nota/{idTarefa}/{idNota}")
-    void atribuirTarefaANota(@PathVariable("idTarefa") Long idTarefa, @PathVariable("IdNota") Long idNota) throws TarefaException {
+    void atribuirTarefaANota(@PathVariable Long idTarefa, @PathVariable Long idNota) throws TarefaException {
         atribuicaoEDesaTribuicaoTarefaNotaService.atribuirTarefaANota(idTarefa, idNota);
     }
 }
