@@ -1,14 +1,14 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Nota;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.AtualizarNotaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.CriarNotaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Nota.NotaResponseDTO;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesatribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.NotaService;
 import org.springframework.web.bind.annotation.*;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.NotaException;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/Nota")
@@ -21,37 +21,35 @@ public class NotaController {
     }
 
     @GetMapping
-    public List<Nota> listarNotas()
+    public List<NotaResponseDTO> listarNotas()
     {
         return notaService.listarNotas();
     }
 
     @PostMapping
-    public  List<Nota> criarNota(@RequestBody Nota nota)
+    public  NotaResponseDTO criarNota(@RequestBody CriarNotaRequestDTO nota)
     {
-        notaService.criarNota(nota);
-        return listarNotas();
+        return notaService.criarNota(nota);
+
     }
 
     @PutMapping
-    public  List<Nota> atualizarNota( @RequestBody Nota nota) throws NotaException {
-        notaService.editarNota(nota);
-        return listarNotas();
+    public  NotaResponseDTO atualizarNota( @RequestBody AtualizarNotaRequestDTO nota) throws NotaException {
+        return notaService.editarNota(nota);
     }
 
     @DeleteMapping("/{id}")
-    public  List<Nota> deletarNota(@PathVariable("id") Long id) throws NotaException {
+    public  void deletarNota(@PathVariable("id") Long id) throws NotaException {
         notaService.deletarNota(id);
-        return listarNotas();
     }
 
     @GetMapping("/pelo-id/{id}")
-    public  Optional<Nota> notaPeloId(@PathVariable("id") Long id) throws NotaException {
+    public  NotaResponseDTO  notaPeloId(@PathVariable("id") Long id) throws NotaException {
         return notaService.mostrarNotaEspecificaPeloId(id);
     }
 
     @GetMapping("/pela-tag/{tag}")
-    public  List<Nota> notasComATag(@PathVariable("tag") String tag) throws NotaException {
+    public  List<NotaResponseDTO> notasComATag(@PathVariable("tag") String tag) throws NotaException {
         return notaService.exibirNotasPelaTag(tag);
     }
 

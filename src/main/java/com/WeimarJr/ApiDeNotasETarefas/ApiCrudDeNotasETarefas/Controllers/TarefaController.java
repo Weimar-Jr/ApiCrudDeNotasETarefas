@@ -1,7 +1,9 @@
 package com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Controllers;
 
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.AtualizarTarefaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.CriarTarefaRequestDTO;
+import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.DTOEntidades.Tarefa.TarefaResponseDTO;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Exceptions.TarefaException;
-import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Entidades.Tarefa;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.AtribuicaoEDesatribuicaoTarefaNotaService;
 import com.WeimarJr.ApiDeNotasETarefas.ApiCrudDeNotasETarefas.Services.TarefaService;
 import org.springframework.web.bind.annotation.*;
@@ -21,40 +23,37 @@ public class TarefaController {
     }
 
     @GetMapping
-    List<Tarefa> listarTarefas() throws TarefaException {
+    List<TarefaResponseDTO> listarTarefas() throws TarefaException {
         return tarefaService.listarTarefas();
     }
 
     @GetMapping("/prioridade/{prioridade}")
-    List<Tarefa> mostrarTarefasDePrioridadeEspecifica(@PathVariable("prioridade") int id) throws TarefaException {
+    List<TarefaResponseDTO> mostrarTarefasDePrioridadeEspecifica(@PathVariable("prioridade") int id) throws TarefaException {
         return tarefaService.mostrarTarefasPelaPrioridade(id);
     }
 
     @GetMapping("/concluidas/{sim-ou-nao}")
-    List<Tarefa> mostrarTarefasConcluidasOuNao(@PathVariable("sim-ou-nao") boolean simOuNao) throws TarefaException {
+    List<TarefaResponseDTO> mostrarTarefasConcluidasOuNao(@PathVariable("sim-ou-nao") boolean simOuNao) throws TarefaException {
         return tarefaService.mostrarTarefasConcluidasOuNao(simOuNao);
     }
 
     @PostMapping
-    List<Tarefa> criarTarefa(@RequestBody Tarefa tarefa) throws TarefaException {
-        tarefaService.criarTarefa(tarefa);
-        return listarTarefas();
+    TarefaResponseDTO criarTarefa(@RequestBody CriarTarefaRequestDTO tarefa) throws TarefaException {
+       return tarefaService.criarTarefa(tarefa);
+
     }
 
     @PutMapping
-    List<Tarefa> atualizarTarefa(@RequestBody Tarefa tarefa) throws TarefaException {
-        tarefaService.editarTarefa(tarefa);
-        return listarTarefas();
+    TarefaResponseDTO atualizarTarefa(@RequestBody AtualizarTarefaRequestDTO tarefa) throws TarefaException {
+        return tarefaService.editarTarefa(tarefa);
     }
 
     @DeleteMapping("/{id}")
-    List<Tarefa> apagarTarefa(@PathVariable("id") Long id) throws TarefaException {
+    void apagarTarefa(@PathVariable("id") Long id) throws TarefaException {
         tarefaService.deletarTarefa(id);
-        return listarTarefas();
     }
     @PutMapping("/atribuir-tarefa-a-nota/{idTarefa}/{idNota}")
-    List<Tarefa> atribuirTarefaANota(@PathVariable("idTarefa") Long idTarefa, @PathVariable("IdNota") Long idNota) throws TarefaException {
+    void atribuirTarefaANota(@PathVariable("idTarefa") Long idTarefa, @PathVariable("IdNota") Long idNota) throws TarefaException {
         atribuicaoEDesaTribuicaoTarefaNotaService.atribuirTarefaANota(idTarefa, idNota);
-        return listarTarefas();
     }
 }
